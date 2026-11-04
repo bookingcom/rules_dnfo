@@ -72,6 +72,7 @@ go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency =
 go_deps.from_file(go_mod = "//:go.mod")
 use_repo(
     go_deps,
+    "bazel_gazelle_go_repository_config",
     "in_gopkg_yaml_v3",
 )
 
