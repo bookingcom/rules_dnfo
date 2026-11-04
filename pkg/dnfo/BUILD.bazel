@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "builder.go",
         "config.go",
+        "gpg.go",
         "lock.go",
         "solver.go",
     ],
@@ -20,6 +21,7 @@ go_test(
     srcs = [
         "builder_test.go",
         "config_test.go",
+        "gpg_test.go",
         "lock_test.go",
     ],
     embed = [":dnfo"],

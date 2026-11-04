@@ -82,7 +82,7 @@ _dnfo_image = rule(
     toolchains = [Label(DNFO_TOOLCHAIN_TYPE)],
 )
 
-def dnfo_image(name, config, contents = None, architecture = "x86_64", output = "oci", tag = "", **kwargs):
+def dnfo_image(name, config, contents = None, architecture = "x86_64", output = "oci", tag = "", gpgcheck = True, keyring = [], **kwargs):
     """Builds an OCI container image from RPM packages declared in a dnfo YAML specification.
 
     Also generates a `<name>.lock` target that can be executed with `bazel run` to refresh
@@ -95,6 +95,8 @@ def dnfo_image(name, config, contents = None, architecture = "x86_64", output = 
       architecture: Target CPU architecture (e.g. x86_64, aarch64).
       output: Output format ('oci' for directory layout, 'tar' for layer tarball).
       tag: Optional container image tag.
+      gpgcheck: Whether to validate package signatures against GPG keys during locking.
+      keyring: Optional list of local GPG key files.
       **kwargs: Standard rule attributes (e.g. visibility, tags).
     """
     _dnfo_image(
@@ -114,5 +116,7 @@ def dnfo_image(name, config, contents = None, architecture = "x86_64", output = 
             name = name + ".lock",
             config = config,
             arch = architecture,
+            gpgcheck = gpgcheck,
+            keyring = keyring,
             **kwargs
         )
