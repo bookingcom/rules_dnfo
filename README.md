@@ -98,7 +98,7 @@ dnfo_image(
 Run the automatically generated `.lock` companion target:
 
 ```bash
-INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id=${INVOCATION_ID} //:my_image.lock
+bazel run //:my_image.lock
 ```
 
 This writes or updates `dnfo.lock.json` in the workspace directory.
@@ -106,7 +106,7 @@ This writes or updates `dnfo.lock.json` in the workspace directory.
 ### 4. Build the container image
 
 ```bash
-INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id=${INVOCATION_ID} //:my_image
+bazel build //:my_image
 ```
 
 ## License
