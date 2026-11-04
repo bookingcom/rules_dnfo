@@ -1,0 +1,72 @@
+module(
+    name = "rules_dnfo",
+    version = "0.0.1",
+)
+
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "platforms_contrib", version = "1.0.0-alpha.0")
+bazel_dep(name = "bazel_skylib", version = "1.9.2")
+bazel_dep(name = "bazel_lib", version = "3.7.2")
+bazel_dep(name = "tar.bzl", version = "0.10.9")
+
+# dnf5-prebuilt is not yet available in the Bazel Central Registry (BCR)
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.3")
+archive_override(
+    module_name = "dnf5-prebuilt",
+    integrity = "sha256-Lsvj4dkCXXnGO7+cX4ZNAAmkrN6fLgHkYn1R0jkt1zc=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.3",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.3/dnf5-prebuilt-v5.4.6.0.bcr.3.tar.gz"],
+)
+
+dnf5 = use_extension("@dnf5-prebuilt//dnf5-prebuilt:extensions.bzl", "dnf5")
+dnf5.toolchains()
+use_repo(dnf5, "dnf5_toolchains")
+
+register_toolchains("@dnf5_toolchains//:all")
+
+bsd_tar_toolchains = use_extension("@tar.bzl//tar:extensions.bzl", "toolchains")
+use_repo(bsd_tar_toolchains, "bsd_tar_toolchains")
+
+register_toolchains("@bsd_tar_toolchains//:all")
+
+dnfo = use_extension(
+    "//dnfo:extensions.bzl",
+    "dnfo",
+)
+dnfo.toolchains(from_source = True)
+use_repo(dnfo, "dnfo_toolchains")
+
+register_toolchains("@dnfo_toolchains//:all")
+
+bazel_dep(name = "rules_go", version = "0.65.0", dev_dependency = True)
+bazel_dep(name = "gazelle", version = "0.54.0", dev_dependency = True)
+bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.28", dev_dependency = True)
+bazel_dep(name = "toolchains_llvm", version = "1.12.0", dev_dependency = True)
+
+go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
+go_sdk.from_file(go_mod = "//:go.mod")
+use_repo(go_sdk, "go_toolchains")
+
+register_toolchains(
+    "@go_toolchains//:all",
+    dev_dependency = True,
+)
+
+go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
+go_deps.from_file(go_mod = "//:go.mod")
+use_repo(
+    go_deps,
+    "in_gopkg_yaml_v3",
+)
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm", dev_dependency = True)
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "latest",
+)
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains(
+    "@llvm_toolchain//:all",
+    dev_dependency = True,
+)

@@ -1,0 +1,14 @@
+# Bzlmod
+common --enable_bzlmod
+
+# Registries
+common --registry=https://bazel-contrib.github.io/rules_img --registry=https://bcr.bazel.build
+
+# CI configuration profile
+common:ci --color=yes
+common:ci --show_progress_rate_limit=5
+test:ci --test_output=errors
+test:ci --test_summary=terse
+
+# Import user configuration if present
+try-import %workspace%/.bazelrc.user

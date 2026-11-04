@@ -1,0 +1,8 @@
+"""Repository configuration for rules_dnfo."""
+
+ignore_directories([
+    ".worktrees/*",
+    ".worktrees/**",
+    "e2e/*",
+    "e2e/**",
+])

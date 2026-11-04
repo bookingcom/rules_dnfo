@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  # Cancel previous runs of the same PR or branch, except on main.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}${{ github.ref_name == 'main' && format('-{0}', github.run_id) || '' }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    env:
+      BUILDBUDDY_ENDPOINT: ${{ vars.BUILDBUDDY_ENDPOINT }}
+      BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          bazelisk-cache: true
+          repository-cache: true
+          disk-cache: ${{ env.BUILDBUDDY_ENDPOINT == '' || env.BUILDBUDDY_API_KEY == '' }}
+      - name: Configure remote cache
+        if: env.BUILDBUDDY_ENDPOINT != '' && env.BUILDBUDDY_API_KEY != ''
+        run: |
+          {
+            echo "common --config=buildbuddy"
+            echo "common:buildbuddy --bes_backend=grpcs://${BUILDBUDDY_ENDPOINT}"
+            echo "common:buildbuddy --bes_results_url=https://${BUILDBUDDY_ENDPOINT}/invocation/"
+            echo "common:buildbuddy --remote_cache=grpcs://${BUILDBUDDY_ENDPOINT}"
+            echo "common:buildbuddy --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY}"
+          } > .bazelrc.user
+      - name: Build
+        run: bazel --bazelrc=.github/workflows/ci.bazelrc build //...
+      - name: Test
+        run: bazel --bazelrc=.github/workflows/ci.bazelrc test //...
+      - name: Build dnfo dist
+        run: |
+          rm -rf dist && mkdir -p dist
+          bazel --bazelrc=.github/workflows/ci.bazelrc build -c opt //cmd/dnfo:dist
+          cp -f -L bazel-bin/cmd/dnfo/dnfo-*.tar.gz dist/
+      - name: Check Starlark files with gazelle.check
+        run: bazel --bazelrc=.github/workflows/ci.bazelrc run //:gazelle.check

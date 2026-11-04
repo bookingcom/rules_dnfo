@@ -1,0 +1,20 @@
+# Bazel settings applied on CI only (--bazelrc=.github/workflows/ci.bazelrc).
+
+common --announce_rc
+common --color=yes
+common --show_progress_rate_limit=30
+test --test_output=errors
+
+# BuildBuddy remote cache / execution, enabled by the workflows when the
+# BUILDBUDDY_ENDPOINT repository variable (host name) and the BUILDBUDDY_API_KEY
+# secret are set.
+common:buildbuddy --remote_timeout=3600
+common:buildbuddy --noexperimental_remote_cache_chunking
+common:buildbuddy-rbe --config=buildbuddy
+common:buildbuddy-rbe --config=rbe
+common:buildbuddy-rbe --jobs=100
+build:buildbuddy-rbe --remote_download_outputs=toplevel
+test:buildbuddy-rbe --remote_download_outputs=minimal
+
+# Hosted runners are small; use every core.
+build --local_resources=cpu=HOST_CPUS

@@ -1,0 +1,32 @@
+contents:
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/$basearch/
+      gpgcheck: 0
+  packages:
+    - bash
+    - coreutils
+
+entrypoint:
+  command: /bin/bash
+
+cmd: "-l"
+
+work-dir: /home
+
+environment:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  TERM: xterm
+
+accounts:
+  users:
+    - username: nonroot
+      uid: 65532
+      gid: 65532
+  groups:
+    - groupname: nonroot
+      gid: 65532
+
+archs:
+  - x86_64
