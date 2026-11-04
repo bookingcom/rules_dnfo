@@ -18,9 +18,17 @@ def _dnfo_lock_impl(ctx):
         args.add("--arch=" + ctx.attr.arch)
     if ctx.attr.releasever:
         args.add("--releasever=" + ctx.attr.releasever)
+    if ctx.attr.gpgcheck:
+        args.add("--gpgcheck=true")
+    else:
+        args.add("--gpgcheck=false")
 
     inputs = [ctx.file.config]
     transitive_inputs = [dnfo_info.files]
+
+    if ctx.files.keyring:
+        args.add("--keyring=" + ",".join([f.path for f in ctx.files.keyring]))
+        inputs.extend(ctx.files.keyring)
 
     if dnf5_info:
         args.add("--dnf5=" + dnf5_info.dnf5.path)
@@ -47,6 +55,16 @@ def _dnfo_lock_impl(ctx):
         run_args.append("--arch=" + ctx.attr.arch)
     if ctx.attr.releasever:
         run_args.append("--releasever=" + ctx.attr.releasever)
+    if ctx.attr.gpgcheck:
+        run_args.append("--gpgcheck=true")
+    else:
+        run_args.append("--gpgcheck=false")
+    if ctx.files.keyring:
+        key_rlocations = [
+            f.short_path[3:] if f.short_path.startswith("../") else ((ctx.workspace_name or "_main") + "/" + f.short_path)
+            for f in ctx.files.keyring
+        ]
+        run_args.append("--keyring=" + ",".join(key_rlocations))
 
     tool_rel = dnfo_info.dnfo.short_path
     tool_rlocation = tool_rel[3:] if tool_rel.startswith("../") else ((ctx.workspace_name or "_main") + "/" + tool_rel)
@@ -105,6 +123,14 @@ dnfo_lock = rule(
         ),
         "releasever": attr.string(
             doc = "Distribution release version.",
+        ),
+        "gpgcheck": attr.bool(
+            default = True,
+            doc = "Whether to validate packages against GPG keys.",
+        ),
+        "keyring": attr.label_list(
+            allow_files = True,
+            doc = "Optional local GPG public key files.",
         ),
         "out": attr.output(
             doc = "Output lockfile name.",

@@ -1,9 +1,12 @@
 contents:
+  keyring:
+    - https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10
   repositories:
     - id: baseos
       name: BaseOS
       baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/$basearch/
-      gpgcheck: 0
+      gpgcheck: 1
+      gpgkey: https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10
   packages:
     - bash
     - coreutils

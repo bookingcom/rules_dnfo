@@ -54,6 +54,8 @@ func runLock(args []string) {
 	dnf5Path := fs.String("dnf5", "", "Path to hermetic dnf5 binary")
 	rpmPath := fs.String("rpm", "", "Path to hermetic rpm binary")
 	releasever := fs.String("releasever", "", "OS release version (e.g. 10)")
+	gpgcheck := fs.Bool("gpgcheck", true, "Validate package signatures against GPG keys")
+	keyring := fs.String("keyring", "", "Comma-separated list of additional GPG key files or URLs")
 	fs.Parse(args)
 
 	if fs.NArg() < 1 {
@@ -72,6 +74,16 @@ func runLock(args []string) {
 		}
 	}
 
+	var keyList []string
+	if *keyring != "" {
+		for _, k := range strings.Split(*keyring, ",") {
+			k = strings.TrimSpace(k)
+			if k != "" {
+				keyList = append(keyList, k)
+			}
+		}
+	}
+
 	opts := dnfo.SolverOptions{
 		ConfigPath: configPath,
 		OutputPath: outPath,
@@ -79,6 +91,8 @@ func runLock(args []string) {
 		DNF5Path:   *dnf5Path,
 		RPMPath:    *rpmPath,
 		ReleaseVer: *releasever,
+		GPGCheck:   *gpgcheck,
+		Keyring:    keyList,
 	}
 
 	lock, err := dnfo.ResolveLock(opts)

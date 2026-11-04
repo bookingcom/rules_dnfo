@@ -9,15 +9,17 @@ import (
 
 // LockedPackage defines a resolved and locked RPM package artifact.
 type LockedPackage struct {
-	Name         string   `json:"name"`
-	Version      string   `json:"version"`
-	Arch         string   `json:"arch"`
-	Nevra        string   `json:"nevra,omitempty"`
-	URL          string   `json:"url"`
-	Integrity    string   `json:"integrity"`
-	Checksum     string   `json:"checksum"`
-	Dependencies []string `json:"dependencies,omitempty"`
-	Recommends   []string `json:"recommends,omitempty"`
+	Name            string   `json:"name"`
+	Version         string   `json:"version"`
+	Arch            string   `json:"arch"`
+	Nevra           string   `json:"nevra,omitempty"`
+	URL             string   `json:"url"`
+	Integrity       string   `json:"integrity"`
+	Checksum        string   `json:"checksum"`
+	GPGKeyID        string   `json:"gpg_key_id,omitempty"`
+	SignatureStatus string   `json:"signature_status,omitempty"`
+	Dependencies    []string `json:"dependencies,omitempty"`
+	Recommends      []string `json:"recommends,omitempty"`
 }
 
 // LockFile represents the JSON structure of a dnfo lockfile.
