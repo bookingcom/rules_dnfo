@@ -20,7 +20,7 @@ jobs:
       BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.15.0
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelisk-cache: true
           repository-cache: true
