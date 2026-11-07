@@ -1,183 +1,6 @@
 {
   "lockFileVersion": 28,
   "registryFileHashes": {
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20210324.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20211102.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20230125.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20230802.0.bcr.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20230802.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20230802.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20240116.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20240116.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20250127.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20250512.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20250814.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/abseil-cpp/20250814.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/apple_support/1.11.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/apple_support/1.15.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/apple_support/1.21.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/apple_support/1.21.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/apple_support/2.5.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/aspect_gazelle_prebuilt/0.0.28/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/aspect_tools_telemetry/0.5.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.1.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.10.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.11.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.15.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.17.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.18.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.19.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.21.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.23.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.27.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.28.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.3.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.30.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.33.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.34.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.4.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.42.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.52.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.9.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_features/1.9.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_lib/3.0.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_lib/3.7.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.0.3/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.1.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.2.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.2.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.3.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.4.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.4.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.5.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.6.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.7.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.7.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.8.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.8.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.9.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/bazel_skylib/1.9.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/buildozer/8.5.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/gawk/5.3.2.bcr.3/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/google_benchmark/1.8.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/googletest/1.11.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/googletest/1.14.0.bcr.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/googletest/1.14.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/googletest/1.15.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/googletest/1.17.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/jsoncpp/1.9.5/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/jsoncpp/1.9.6/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/libpfm/4.11.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/nlohmann_json/3.6.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/package_metadata/0.0.3/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/package_metadata/0.0.7/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.10/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.11/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.4/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.5/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.6/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.7/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.8/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/0.0.9/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/1.0.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms/1.1.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/platforms_contrib/1.0.0-alpha.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/21.7/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/27.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/29.0-rc2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/29.0-rc3/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/29.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/3.19.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/32.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/protobuf/33.4/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/pybind11_bazel/2.11.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/pybind11_bazel/2.12.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/re2/2023-09-01/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/re2/2024-07-02.bcr.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/re2/2024-07-02/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_android/0.1.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_apple/3.16.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_apple/4.1.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.10/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.13/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.15/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.16/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.17/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.6/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.8/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.0.9/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.1.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.1.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.1.5/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.2.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.2.13/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.2.15/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.2.17/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.2.4/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_cc/0.2.8/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_foreign_cc/0.9.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_fuzzing/0.5.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/4.0.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/5.3.5/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/6.5.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/7.10.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/7.12.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/7.2.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/7.6.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/8.16.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/8.3.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/8.5.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/8.6.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_java/9.1.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_jvm_external/4.4.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_jvm_external/5.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_jvm_external/5.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_jvm_external/6.3/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_jvm_external/6.7/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_kotlin/1.9.6/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_license/0.0.3/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_license/0.0.7/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_license/1.0.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_pkg/0.7.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_pkg/1.0.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_proto/4.0.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_proto/5.3.0-21.7/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_proto/6.0.0-rc1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_proto/6.0.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_proto/7.1.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/0.10.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/0.23.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/0.25.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/0.28.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/0.31.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/0.33.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/0.4.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/1.3.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/1.4.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/1.6.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_python/1.7.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_shell/0.2.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_shell/0.3.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_shell/0.4.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_shell/0.6.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_swift/1.16.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_swift/2.1.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_swift/2.4.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/rules_swift/3.1.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/stardoc/0.5.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/stardoc/0.5.3/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/stardoc/0.7.0/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/stardoc/0.7.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/swift_argument_parser/1.3.1.1/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/swift_argument_parser/1.3.1.2/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/tar.bzl/0.10.9/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/toolchains_buildbuddy/0.0.4/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/upb/0.0.0-20220923-a547704/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/zlib/1.2.11/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/zlib/1.3.1.bcr.5/MODULE.bazel": "not found",
-    "https://bazel-contrib.github.io/rules_img/modules/zlib/1.3.1/MODULE.bazel": "not found",
     "https://bcr.bazel.build/bazel_registry.json": "8a28e4aff06ee60aed2a8c281907fb8bcbf3b753c91fb5a5c57da3215d5b3497",
     "https://bcr.bazel.build/modules/abseil-cpp/20210324.2/MODULE.bazel": "7cd0312e064fde87c8d1cd79ba06c876bd23630c83466e9500321be55c96ace2",
     "https://bcr.bazel.build/modules/abseil-cpp/20211102.0/MODULE.bazel": "70390338f7a5106231d20620712f7cccb659cd0e9d073d1991c038eb9fc57589",
@@ -200,6 +23,8 @@
     "https://bcr.bazel.build/modules/apple_support/2.5.2/source.json": "dd51ee925a550e92b55eb41c4c809a967da311a2d2520241252a238a48b39c4c",
     "https://bcr.bazel.build/modules/aspect_gazelle_prebuilt/0.0.28/MODULE.bazel": "38f8e408ce4448f29d72eb368eee8a8fb0b93501dc1b48270f8ec12cc831f7de",
     "https://bcr.bazel.build/modules/aspect_gazelle_prebuilt/0.0.28/source.json": "9c50d1aeb67dda0dd436c29e803c7d8c955a90b1495d57f1a7a037313d71bede",
+    "https://bcr.bazel.build/modules/aspect_rules_py/2.0.0-alpha.10/MODULE.bazel": "5a5860c9af35e31aeeb05363d5807e745d65cb0925e0c2f88e77a3365c56c012",
+    "https://bcr.bazel.build/modules/aspect_rules_py/2.0.0-alpha.10/source.json": "aaacd54d32903b51610f075b02dc3e7b9e7d3728b1d4b79b608bc1cb89e508d8",
     "https://bcr.bazel.build/modules/aspect_tools_telemetry/0.5.2/MODULE.bazel": "c715a5fb6b13a0086c061618f00d033a4ab6d76cbd1083e38d7ca953b5e547f4",
     "https://bcr.bazel.build/modules/aspect_tools_telemetry/0.5.2/source.json": "4dd300d44767ad4860098b006dda614e67ab0409ae6ec6e133faad303fe9ede8",
     "https://bcr.bazel.build/modules/bazel_features/1.1.1/MODULE.bazel": "27b8c79ef57efe08efccbd9dd6ef70d61b4798320b8d3c134fd571f78963dbcd",
@@ -219,6 +44,9 @@
     "https://bcr.bazel.build/modules/bazel_features/1.34.0/MODULE.bazel": "e8475ad7c8965542e0c7aac8af68eb48c4af904be3d614b6aa6274c092c2ea1e",
     "https://bcr.bazel.build/modules/bazel_features/1.4.1/MODULE.bazel": "e45b6bb2350aff3e442ae1111c555e27eac1d915e77775f6fdc4b351b758b5d7",
     "https://bcr.bazel.build/modules/bazel_features/1.42.1/MODULE.bazel": "275a59b5406ff18c01739860aa70ad7ccb3cfb474579411decca11c93b951080",
+    "https://bcr.bazel.build/modules/bazel_features/1.43.0/MODULE.bazel": "defa2226f06ba20550d6548c3a2ea2a7929634437a52973869c20c225450eb91",
+    "https://bcr.bazel.build/modules/bazel_features/1.45.0/MODULE.bazel": "7daec6d87ab0703417486d4cb948af0b06f55d4d7c08cbb5978c80e79b538edf",
+    "https://bcr.bazel.build/modules/bazel_features/1.47.0/MODULE.bazel": "e34df3cb35b1684cfa69923a61ae3803595babd3942cd306a488d51400886b30",
     "https://bcr.bazel.build/modules/bazel_features/1.52.0/MODULE.bazel": "8620725a18328936c38914a54c90b042ca8b0391abb9a751b9a58f13fce1f3c0",
     "https://bcr.bazel.build/modules/bazel_features/1.52.0/source.json": "d03f68822370a0f40ca6e5a7445b8b2916163382c1a97ec021cbbdb6cb3f1461",
     "https://bcr.bazel.build/modules/bazel_features/1.9.0/MODULE.bazel": "885151d58d90d8d9c811eb75e3288c11f850e1d6b481a8c9f766adee4712358b",
@@ -237,15 +65,19 @@
     "https://bcr.bazel.build/modules/bazel_skylib/1.6.1/MODULE.bazel": "8fdee2dbaace6c252131c00e1de4b165dc65af02ea278476187765e1a617b917",
     "https://bcr.bazel.build/modules/bazel_skylib/1.7.0/MODULE.bazel": "0db596f4563de7938de764cc8deeabec291f55e8ec15299718b93c4423e9796d",
     "https://bcr.bazel.build/modules/bazel_skylib/1.7.1/MODULE.bazel": "3120d80c5861aa616222ec015332e5f8d3171e062e3e804a2a0253e1be26e59b",
+    "https://bcr.bazel.build/modules/bazel_skylib/1.8.0/MODULE.bazel": "2fb3fb53675f6adfc1ca5bfbd5cfb655ae350fba4706d924a8ec7e3ba945671c",
     "https://bcr.bazel.build/modules/bazel_skylib/1.8.1/MODULE.bazel": "88ade7293becda963e0e3ea33e7d54d3425127e0a326e0d17da085a5f1f03ff6",
     "https://bcr.bazel.build/modules/bazel_skylib/1.8.2/MODULE.bazel": "69ad6927098316848b34a9142bcc975e018ba27f08c4ff403f50c1b6e646ca67",
     "https://bcr.bazel.build/modules/bazel_skylib/1.9.0/MODULE.bazel": "72997b29dfd95c3fa0d0c48322d05590418edef451f8db8db5509c57875fb4b7",
     "https://bcr.bazel.build/modules/bazel_skylib/1.9.2/MODULE.bazel": "8c51259b0f4481475586dbfede7591e57b75702e637f840f6138eec80c34b270",
     "https://bcr.bazel.build/modules/bazel_skylib/1.9.2/source.json": "41cbde7546542dee2f26e3f10bf1c4ac57909943194b7ac48cc5238a01893aa8",
+    "https://bcr.bazel.build/modules/buildifier_prebuilt/8.5.1.4/MODULE.bazel": "e99874bb50f33eedd0f51ebb817b7f7b795e12f93ff2736be2c0c430dc6f813a",
+    "https://bcr.bazel.build/modules/buildifier_prebuilt/8.5.1.4/source.json": "403059e84b591e96a4a37e73d50b8ef8eecd6bf3095aef8078b1f53cf7ea1490",
     "https://bcr.bazel.build/modules/buildozer/8.5.1/MODULE.bazel": "a35d9561b3fc5b18797c330793e99e3b834a473d5fbd3d7d7634aafc9bdb6f8f",
     "https://bcr.bazel.build/modules/buildozer/8.5.1/source.json": "e3386e6ff4529f2442800dee47ad28d3e6487f36a1f75ae39ae56c70f0cd2fbd",
     "https://bcr.bazel.build/modules/gawk/5.3.2.bcr.3/MODULE.bazel": "f1b7bb2dd53e8f2ef984b39485ec8a44e9076dda5c4b8efd2fb4c6a6e856a31d",
-    "https://bcr.bazel.build/modules/gawk/5.3.2.bcr.3/source.json": "ebe931bfe362e4b41e59ee00a528db6074157ff2ced92eb9e970acab2e1089c9",
+    "https://bcr.bazel.build/modules/gawk/5.3.2.bcr.7/MODULE.bazel": "1e5e03c383fa64ebbe0942a225c32168fd6ef6b270351bbec481d47d19d1b96d",
+    "https://bcr.bazel.build/modules/gawk/5.3.2.bcr.7/source.json": "34a83d58ae2f1ef6731d1fc8a1b6f07825741aff3f5993b67b67ec21d2c2946e",
     "https://bcr.bazel.build/modules/google_benchmark/1.8.2/MODULE.bazel": "a70cf1bba851000ba93b58ae2f6d76490a9feb74192e57ab8e8ff13c34ec50cb",
     "https://bcr.bazel.build/modules/googletest/1.11.0/MODULE.bazel": "3a83f095183f66345ca86aa13c58b59f9f94a2f81999c093d4eeaa2d262d12f4",
     "https://bcr.bazel.build/modules/googletest/1.14.0.bcr.1/MODULE.bazel": "22c31a561553727960057361aa33bf20fb2e98584bc4fec007906e27053f80c6",
@@ -253,15 +85,19 @@
     "https://bcr.bazel.build/modules/googletest/1.15.2/MODULE.bazel": "6de1edc1d26cafb0ea1a6ab3f4d4192d91a312fd2d360b63adaa213cd00b2108",
     "https://bcr.bazel.build/modules/googletest/1.17.0/MODULE.bazel": "dbec758171594a705933a29fcf69293d2468c49ec1f2ebca65c36f504d72df46",
     "https://bcr.bazel.build/modules/googletest/1.17.0/source.json": "38e4454b25fc30f15439c0378e57909ab1fd0a443158aa35aec685da727cd713",
+    "https://bcr.bazel.build/modules/hermetic_launcher/0.0.16/MODULE.bazel": "ac8a135156c67b45fff31ca11db0faced1d61890654b96d2c0ea6e8a532a3d9c",
+    "https://bcr.bazel.build/modules/hermetic_launcher/0.0.17/MODULE.bazel": "afa67883ae04001c93578f80c39e5ec9231ae670978bc380778baf66e1936ad5",
+    "https://bcr.bazel.build/modules/hermetic_launcher/0.0.17/source.json": "46ee01ccb275e46f59a3c070f91be52eb113405efe577a99365dd69f168713ef",
     "https://bcr.bazel.build/modules/jsoncpp/1.9.5/MODULE.bazel": "31271aedc59e815656f5736f282bb7509a97c7ecb43e927ac1a37966e0578075",
     "https://bcr.bazel.build/modules/jsoncpp/1.9.6/MODULE.bazel": "2f8d20d3b7d54143213c4dfc3d98225c42de7d666011528dc8fe91591e2e17b0",
     "https://bcr.bazel.build/modules/jsoncpp/1.9.6/source.json": "a04756d367a2126c3541682864ecec52f92cdee80a35735a3cb249ce015ca000",
     "https://bcr.bazel.build/modules/libpfm/4.11.0/MODULE.bazel": "45061ff025b301940f1e30d2c16bea596c25b176c8b6b3087e92615adbd52902",
     "https://bcr.bazel.build/modules/nlohmann_json/3.6.1/MODULE.bazel": "6f7b417dcc794d9add9e556673ad25cb3ba835224290f4f848f8e2db1e1fca74",
     "https://bcr.bazel.build/modules/nlohmann_json/3.6.1/source.json": "f448c6e8963fdfa7eb831457df83ad63d3d6355018f6574fb017e8169deb43a9",
+    "https://bcr.bazel.build/modules/package_metadata/0.0.10/MODULE.bazel": "cb66e0ce830e01bc00cd9edc984963704f2759ca893a649996e2b1c5c1ea7271",
+    "https://bcr.bazel.build/modules/package_metadata/0.0.10/source.json": "8fc6bece244828a69b3cc608f381118d67fa3cc2aa1a2851dfe8d99a8076d7d0",
     "https://bcr.bazel.build/modules/package_metadata/0.0.3/MODULE.bazel": "77890552ecea9e284b5424c9de827a58099348763a4359e975c359a83d4faa83",
     "https://bcr.bazel.build/modules/package_metadata/0.0.7/MODULE.bazel": "7adb03933fc8401f495800cf4eafcff0edc6da0ff55c7db223ef69d19f689486",
-    "https://bcr.bazel.build/modules/package_metadata/0.0.7/source.json": "50639625e937b56115012674c797cca7a05a96b4878c87d803c13dc2b31de8a0",
     "https://bcr.bazel.build/modules/platforms/0.0.10/MODULE.bazel": "8cb8efaf200bdeb2150d93e162c40f388529a25852b332cec879373771e48ed5",
     "https://bcr.bazel.build/modules/platforms/0.0.11/MODULE.bazel": "0daefc49732e227caa8bfa834d65dc52e8cc18a2faf80df25e8caea151a9413f",
     "https://bcr.bazel.build/modules/platforms/0.0.4/MODULE.bazel": "9b328e31ee156f53f3c416a64f8491f7eb731742655a47c9eec4703a71644aee",
@@ -313,11 +149,14 @@
     "https://bcr.bazel.build/modules/rules_cc/0.2.13/MODULE.bazel": "eecdd666eda6be16a8d9dc15e44b5c75133405e820f620a234acc4b1fdc5aa37",
     "https://bcr.bazel.build/modules/rules_cc/0.2.15/MODULE.bazel": "6a0a4a75a57aa6dc888300d848053a58c6b12a29f89d4304e1c41448514ec6e8",
     "https://bcr.bazel.build/modules/rules_cc/0.2.17/MODULE.bazel": "1849602c86cb60da8613d2de887f9566a6d354a6df6d7009f9d04a14402f9a84",
-    "https://bcr.bazel.build/modules/rules_cc/0.2.17/source.json": "3832f45d145354049137c0090df04629d9c2b5493dc5c2bf46f1834040133a07",
+    "https://bcr.bazel.build/modules/rules_cc/0.2.18/MODULE.bazel": "4460ec36adc8f722a6a2a4ac9374cb91f2acebadaa93fc37966129afb3dece87",
+    "https://bcr.bazel.build/modules/rules_cc/0.2.18/source.json": "abad668ff2fd63ada1ac49bf386d37e27048b89a3465a6fd968bb832b00a09d3",
     "https://bcr.bazel.build/modules/rules_cc/0.2.4/MODULE.bazel": "1ff1223dfd24f3ecf8f028446d4a27608aa43c3f41e346d22838a4223980b8cc",
     "https://bcr.bazel.build/modules/rules_cc/0.2.8/MODULE.bazel": "f1df20f0bf22c28192a794f29b501ee2018fa37a3862a1a2132ae2940a23a642",
     "https://bcr.bazel.build/modules/rules_foreign_cc/0.9.0/MODULE.bazel": "c9e8c682bf75b0e7c704166d79b599f93b72cfca5ad7477df596947891feeef6",
     "https://bcr.bazel.build/modules/rules_fuzzing/0.5.2/MODULE.bazel": "40c97d1144356f52905566c55811f13b299453a14ac7769dfba2ac38192337a8",
+    "https://bcr.bazel.build/modules/rules_img/0.3.24/MODULE.bazel": "a7c88122a64df59ccfeeb4b98aed6fd3a48e6e6f6a8e638e3646a135d4818cec",
+    "https://bcr.bazel.build/modules/rules_img/0.3.24/source.json": "e631bc0986f7951908d86aaa0174a862fe343e378cf9be3563183cbcdd17f2ae",
     "https://bcr.bazel.build/modules/rules_java/4.0.0/MODULE.bazel": "5a78a7ae82cd1a33cef56dc578c7d2a46ed0dca12643ee45edbb8417899e6f74",
     "https://bcr.bazel.build/modules/rules_java/5.3.5/MODULE.bazel": "a4ec4f2db570171e3e5eb753276ee4b389bae16b96207e9d3230895c99644b86",
     "https://bcr.bazel.build/modules/rules_java/6.5.2/MODULE.bazel": "1d440d262d0e08453fa0c4d8f699ba81609ed0e9a9a0f02cd10b3e7942e61e31",
@@ -363,7 +202,10 @@
     "https://bcr.bazel.build/modules/rules_python/1.4.1/MODULE.bazel": "8991ad45bdc25018301d6b7e1d3626afc3c8af8aaf4bc04f23d0b99c938b73a6",
     "https://bcr.bazel.build/modules/rules_python/1.6.0/MODULE.bazel": "7e04ad8f8d5bea40451cf80b1bd8262552aa73f841415d20db96b7241bd027d8",
     "https://bcr.bazel.build/modules/rules_python/1.7.0/MODULE.bazel": "d01f995ecd137abf30238ad9ce97f8fc3ac57289c8b24bd0bf53324d937a14f8",
-    "https://bcr.bazel.build/modules/rules_python/1.7.0/source.json": "028a084b65dcf8f4dc4f82f8778dbe65df133f234b316828a82e060d81bdce32",
+    "https://bcr.bazel.build/modules/rules_python/1.9.0/MODULE.bazel": "afc3a05f29f09f2d3ee95ad99a145250dab41a2b2d8d6f82cc91936b3213282c",
+    "https://bcr.bazel.build/modules/rules_python/1.9.0/source.json": "3921ea0b65298d51aead5b9e4a82203d7be9b5918619b58b53f1c259f4e63169",
+    "https://bcr.bazel.build/modules/rules_runfiles_group/0.1.0/MODULE.bazel": "bb7adb77a1ff532651c392981490cb8e7e369c7d0642511729bedadc05c3f4ad",
+    "https://bcr.bazel.build/modules/rules_runfiles_group/0.1.0/source.json": "37bf3d25c835b283cfebed6432bacbc27b97b56e762bfa2b50f5d9fe1b4d2ed8",
     "https://bcr.bazel.build/modules/rules_shell/0.2.0/MODULE.bazel": "fda8a652ab3c7d8fee214de05e7a9916d8b28082234e8d2c0094505c5268ed3c",
     "https://bcr.bazel.build/modules/rules_shell/0.3.0/MODULE.bazel": "de4402cd12f4cc8fda2354fce179fdb068c0b9ca1ec2d2b17b3e21b24c1a937b",
     "https://bcr.bazel.build/modules/rules_shell/0.4.1/MODULE.bazel": "00e501db01bbf4e3e1dd1595959092c2fadf2087b2852d3f553b5370f5633592",
@@ -374,6 +216,8 @@
     "https://bcr.bazel.build/modules/rules_swift/2.4.0/MODULE.bazel": "1639617eb1ede28d774d967a738b4a68b0accb40650beadb57c21846beab5efd",
     "https://bcr.bazel.build/modules/rules_swift/3.1.2/MODULE.bazel": "72c8f5cf9d26427cee6c76c8e3853eb46ce6b0412a081b2b6db6e8ad56267400",
     "https://bcr.bazel.build/modules/rules_swift/3.1.2/source.json": "e85761f3098a6faf40b8187695e3de6d97944e98abd0d8ce579cb2daf6319a66",
+    "https://bcr.bazel.build/modules/sha256.bzl/0.0.1/MODULE.bazel": "95bc89b9618718bf23154563ff6f2e15151429aff0b2872ae944906935683fc7",
+    "https://bcr.bazel.build/modules/sha256.bzl/0.0.1/source.json": "fcfc3c116d11521311940b995151878c03b51ea822a9774583c021b5be5b2b26",
     "https://bcr.bazel.build/modules/stardoc/0.5.1/MODULE.bazel": "1a05d92974d0c122f5ccf09291442580317cdd859f07a8655f1db9a60374f9f8",
     "https://bcr.bazel.build/modules/stardoc/0.5.3/MODULE.bazel": "c7f6948dae6999bf0db32c1858ae345f112cacf98f174c7a8bb707e41b974f1c",
     "https://bcr.bazel.build/modules/stardoc/0.7.0/MODULE.bazel": "05e3d6d30c099b6770e97da986c53bd31844d7f13d41412480ea265ac9e8079c",
@@ -382,6 +226,7 @@
     "https://bcr.bazel.build/modules/swift_argument_parser/1.3.1.1/MODULE.bazel": "5e463fbfba7b1701d957555ed45097d7f984211330106ccd1352c6e0af0dcf91",
     "https://bcr.bazel.build/modules/swift_argument_parser/1.3.1.2/MODULE.bazel": "75aab2373a4bbe2a1260b9bf2a1ebbdbf872d3bd36f80bff058dccd82e89422f",
     "https://bcr.bazel.build/modules/swift_argument_parser/1.3.1.2/source.json": "5fba48bbe0ba48761f9e9f75f92876cafb5d07c0ce059cc7a8027416de94a05b",
+    "https://bcr.bazel.build/modules/tar.bzl/0.10.1/MODULE.bazel": "bf5fda5b5ccef8c3c4a5f4886144377386e0baa382972f257acb42dcf40ea908",
     "https://bcr.bazel.build/modules/tar.bzl/0.10.9/MODULE.bazel": "4636f5f6a7c34d3d0653634ed95a34560426d548c5301c6c5924c885ef737b46",
     "https://bcr.bazel.build/modules/tar.bzl/0.10.9/source.json": "30a5cf0a8281adce53ab1c5a4291e88b2c161e2df1feb6cba4ee50556f1748d7",
     "https://bcr.bazel.build/modules/toolchains_buildbuddy/0.0.4/MODULE.bazel": "735f0ed45a0334971a61157432127380ae9ce285aea6d489565cb81c7a4cf487",
@@ -463,13 +308,35 @@
                 "aspect_rules_py": "2.0.0-alpha.10",
                 "aspect_tools_telemetry": "0.5.2"
               },
-              "last_notice": 0
+              "last_notice": 3
             }
           }
         },
         "moduleExtensionMetadata": {
           "useAllRepos": "NO",
           "reproducible": false
+        }
+      }
+    },
+    "@@pybind11_bazel+//:internal_configure.bzl%internal_configure_extension": {
+      "general": {
+        "bzlTransitiveDigest": "BsgERqYptkJeeC8wFaLj251IoTZTSy/58WA6kVp0q8I=",
+        "usagesDigest": "D1r3lfzMuUBFxgG8V6o0bQTLMk3GkaGOaPzw53wrwyw=",
+        "recordedInputs": [
+          "REPO_MAPPING:pybind11_bazel+,bazel_tools bazel_tools",
+          "FILE:@@pybind11_bazel+//MODULE.bazel e6f4c20442eaa7c90d7190d8dc539d0ab422f95c65a57cc59562170c58ae3d34"
+        ],
+        "generatedRepoSpecs": {
+          "pybind11": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@pybind11_bazel+//:pybind11-BUILD.bazel",
+              "strip_prefix": "pybind11-2.12.0",
+              "urls": [
+                "https://github.com/pybind/pybind11/archive/v2.12.0.zip"
+              ]
+            }
+          }
         }
       }
     },
@@ -530,178 +397,10 @@
         }
       }
     },
-    "@@rules_python+//python/extensions:config.bzl%config": {
-      "general": {
-        "bzlTransitiveDigest": "L+2ZCpb7GIJqvWaXpzkfk/80d916sIFVmSPzrSm6of8=",
-        "usagesDigest": "ZVSXMAGpD+xzVNPuvF1IoLBkty7TROO0+akMapt1pAg=",
-        "recordedInputs": [
-          "REPO_MAPPING:rules_python+,bazel_tools bazel_tools",
-          "REPO_MAPPING:rules_python+,pypi__build rules_python++config+pypi__build",
-          "REPO_MAPPING:rules_python+,pypi__click rules_python++config+pypi__click",
-          "REPO_MAPPING:rules_python+,pypi__colorama rules_python++config+pypi__colorama",
-          "REPO_MAPPING:rules_python+,pypi__importlib_metadata rules_python++config+pypi__importlib_metadata",
-          "REPO_MAPPING:rules_python+,pypi__installer rules_python++config+pypi__installer",
-          "REPO_MAPPING:rules_python+,pypi__more_itertools rules_python++config+pypi__more_itertools",
-          "REPO_MAPPING:rules_python+,pypi__packaging rules_python++config+pypi__packaging",
-          "REPO_MAPPING:rules_python+,pypi__pep517 rules_python++config+pypi__pep517",
-          "REPO_MAPPING:rules_python+,pypi__pip rules_python++config+pypi__pip",
-          "REPO_MAPPING:rules_python+,pypi__pip_tools rules_python++config+pypi__pip_tools",
-          "REPO_MAPPING:rules_python+,pypi__pyproject_hooks rules_python++config+pypi__pyproject_hooks",
-          "REPO_MAPPING:rules_python+,pypi__setuptools rules_python++config+pypi__setuptools",
-          "REPO_MAPPING:rules_python+,pypi__tomli rules_python++config+pypi__tomli",
-          "REPO_MAPPING:rules_python+,pypi__wheel rules_python++config+pypi__wheel",
-          "REPO_MAPPING:rules_python+,pypi__zipp rules_python++config+pypi__zipp"
-        ],
-        "generatedRepoSpecs": {
-          "rules_python_internal": {
-            "repoRuleId": "@@rules_python+//python/private:internal_config_repo.bzl%internal_config_repo",
-            "attributes": {
-              "transition_setting_generators": {},
-              "transition_settings": []
-            }
-          },
-          "pypi__build": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/e2/03/f3c8ba0a6b6e30d7d18c40faab90807c9bb5e9a1e3b2fe2008af624a9c97/build-1.2.1-py3-none-any.whl",
-              "sha256": "75e10f767a433d9a86e50d83f418e83efc18ede923ee5ff7df93b6cb0306c5d4",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__click": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/00/2e/d53fa4befbf2cfa713304affc7ca780ce4fc1fd8710527771b58311a3229/click-8.1.7-py3-none-any.whl",
-              "sha256": "ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__colorama": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl",
-              "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__importlib_metadata": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/2d/0a/679461c511447ffaf176567d5c496d1de27cbe34a87df6677d7171b2fbd4/importlib_metadata-7.1.0-py3-none-any.whl",
-              "sha256": "30962b96c0c223483ed6cc7280e7f0199feb01a0e40cfae4d4450fc6fab1f570",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__installer": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/e5/ca/1172b6638d52f2d6caa2dd262ec4c811ba59eee96d54a7701930726bce18/installer-0.7.0-py3-none-any.whl",
-              "sha256": "05d1933f0a5ba7d8d6296bb6d5018e7c94fa473ceb10cf198a92ccea19c27b53",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__more_itertools": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/50/e2/8e10e465ee3987bb7c9ab69efb91d867d93959095f4807db102d07995d94/more_itertools-10.2.0-py3-none-any.whl",
-              "sha256": "686b06abe565edfab151cb8fd385a05651e1fdf8f0a14191e4439283421f8684",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__packaging": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/49/df/1fceb2f8900f8639e278b056416d49134fb8d84c5942ffaa01ad34782422/packaging-24.0-py3-none-any.whl",
-              "sha256": "2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__pep517": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/25/6e/ca4a5434eb0e502210f591b97537d322546e4833dcb4d470a48c375c5540/pep517-0.13.1-py3-none-any.whl",
-              "sha256": "31b206f67165b3536dd577c5c3f1518e8fbaf38cbc57efff8369a392feff1721",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__pip": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/8a/6a/19e9fe04fca059ccf770861c7d5721ab4c2aebc539889e97c7977528a53b/pip-24.0-py3-none-any.whl",
-              "sha256": "ba0d021a166865d2265246961bec0152ff124de910c5cc39f1156ce3fa7c69dc",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__pip_tools": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/0d/dc/38f4ce065e92c66f058ea7a368a9c5de4e702272b479c0992059f7693941/pip_tools-7.4.1-py3-none-any.whl",
-              "sha256": "4c690e5fbae2f21e87843e89c26191f0d9454f362d8acdbd695716493ec8b3a9",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__pyproject_hooks": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/ae/f3/431b9d5fe7d14af7a32340792ef43b8a714e7726f1d7b69cc4e8e7a3f1d7/pyproject_hooks-1.1.0-py3-none-any.whl",
-              "sha256": "7ceeefe9aec63a1064c18d939bdc3adf2d8aa1988a510afec15151578b232aa2",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__setuptools": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/90/99/158ad0609729111163fc1f674a5a42f2605371a4cf036d0441070e2f7455/setuptools-78.1.1-py3-none-any.whl",
-              "sha256": "c3a9c4211ff4c309edb8b8c4f1cbfa7ae324c4ba9f91ff254e3d305b9fd54561",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__tomli": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/97/75/10a9ebee3fd790d20926a90a2547f0bf78f371b2f13aa822c759680ca7b9/tomli-2.0.1-py3-none-any.whl",
-              "sha256": "939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__wheel": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/7d/cd/d7460c9a869b16c3dd4e1e403cce337df165368c71d6af229a74699622ce/wheel-0.43.0-py3-none-any.whl",
-              "sha256": "55c570405f142630c6b9f72fe09d9b67cf1477fcf543ae5b8dcb1f5b7377da81",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          },
-          "pypi__zipp": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://files.pythonhosted.org/packages/da/55/a03fd7240714916507e1fcf7ae355bd9d9ed2e6db492595f1a67f61681be/zipp-3.18.2-py3-none-any.whl",
-              "sha256": "dce197b859eb796242b0622af1b8beb0a722d52aa2f57133ead08edd5bf5374e",
-              "type": "zip",
-              "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:py_library.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude to avoid non-determinism.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
-            }
-          }
-        }
-      }
-    },
     "@@rules_python+//python/uv:uv.bzl%uv": {
       "general": {
-        "bzlTransitiveDigest": "IgkgxNrtlAec7OnaFrWoCC5NQhHcY/aIz4jsqcNMm8Y=",
-        "usagesDigest": "H8dQoNZcoqP+Mu0tHZTi4KHATzvNkM5ePuEqoQdklIU=",
+        "bzlTransitiveDigest": "/TRCIwkFYo7fpSOLJ54wXFHVpcYJ5edXrsPRRAmCrAg=",
+        "usagesDigest": "6MjoD3H+netDdhklgMWks3NARpHVXxy8kfsMe9XXPa8=",
         "recordedInputs": [
           "REPO_MAPPING:rules_python+,bazel_tools bazel_tools",
           "REPO_MAPPING:rules_python+,platforms platforms"
@@ -754,6 +453,410 @@
     }
   },
   "facts": {
+    "@@aspect_rules_py+//py:extensions.bzl%python_interpreters": {
+      "release_index_v2_20260303_https://github.com/astral-sh/python-build-standalone/releases/download_install_only": {
+        "3.10/aarch64-apple-darwin/default": {
+          "filename": "cpython-3.10.20+20260303-aarch64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "b41060c26454b21990254fdc08a4988f4e325708d785f8a0b4b4533881cf5fd4"
+        },
+        "3.10/aarch64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.10.20+20260303-aarch64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "dcf3b9bd0062276866b4fc84c9e4c39be7ef161d22c769e5f4ee01c8e27100f4"
+        },
+        "3.10/aarch64-unknown-linux-musl/default": {
+          "filename": "cpython-3.10.20+20260303-aarch64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "92713c7f4a7bb77bf8593818e4c1da8db44d415f45b0b5b7a8eb741695c08303"
+        },
+        "3.10/i686-pc-windows-msvc/default": {
+          "filename": "cpython-3.10.20+20260303-i686-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "9bc6cd476a2670a054dc8dbdd22c5b7c7642ac2f0ac810c5bb18aa39083a8a99"
+        },
+        "3.10/x86_64-apple-darwin/default": {
+          "filename": "cpython-3.10.20+20260303-x86_64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "2fd25586216e5e6932d767034618b7bb97654c689f07513009d858398fe181f3"
+        },
+        "3.10/x86_64-pc-windows-msvc/default": {
+          "filename": "cpython-3.10.20+20260303-x86_64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "aa55177f1247cdac1ccdf0877cdf68e9d6718b0914e56f1083404b1dcbac847b"
+        },
+        "3.10/x86_64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.10.20+20260303-x86_64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "c830fc25bc6e318e7ad4961caadee6cc79c041c122884c90ecfad4fe02e20344"
+        },
+        "3.10/x86_64-unknown-linux-musl/default": {
+          "filename": "cpython-3.10.20+20260303-x86_64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.10.20",
+          "sha256": "c781a93c1030c814bc0861dc424c476ca2e0083b429b968f557e1664f3ef223f"
+        },
+        "3.11/aarch64-apple-darwin/default": {
+          "filename": "cpython-3.11.15+20260303-aarch64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "0d29ed7cb6711890b3c6da27b6258c4ad3b506bf8d5a381bff531ca8fa67417f"
+        },
+        "3.11/aarch64-pc-windows-msvc/default": {
+          "filename": "cpython-3.11.15+20260303-aarch64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "84afaa698da2bc12f05aa317ad1ad6bf6708461e737efd08ad7e95d9a8857c1b"
+        },
+        "3.11/aarch64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.11.15+20260303-aarch64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "4786f5ef8567c982517fcd7cb189a5ef4a712ed0aaf3034e839749794155ad4c"
+        },
+        "3.11/aarch64-unknown-linux-musl/default": {
+          "filename": "cpython-3.11.15+20260303-aarch64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "d37ebd873138f85603607a56bc821e07551f45e6938e02d36b04885a6eded7ff"
+        },
+        "3.11/i686-pc-windows-msvc/default": {
+          "filename": "cpython-3.11.15+20260303-i686-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "1924013f72c36c8d19d6887979cded6ca7f2295667d591b88f74260f141e1fee"
+        },
+        "3.11/x86_64-apple-darwin/default": {
+          "filename": "cpython-3.11.15+20260303-x86_64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "6ea2168c4e18cb31d9dc8486634dc375929bcc2adde0957399ce59d90b52297a"
+        },
+        "3.11/x86_64-pc-windows-msvc/default": {
+          "filename": "cpython-3.11.15+20260303-x86_64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "6f194e1ede02260fd3d758893bbf1d3bb4084652d436a8300a229da721c3ddf8"
+        },
+        "3.11/x86_64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.11.15+20260303-x86_64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "17e1f5b2c9668217ba554decd94db04adf3d085203d322c690fd44cde549d576"
+        },
+        "3.11/x86_64-unknown-linux-musl/default": {
+          "filename": "cpython-3.11.15+20260303-x86_64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.11.15",
+          "sha256": "ee54c7baaa5a1fb65922505a646a2d097660b005e55bd35055d0a9c46a5ab916"
+        },
+        "3.12/aarch64-apple-darwin/default": {
+          "filename": "cpython-3.12.13+20260303-aarch64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "2c01f29e9e4ddbd57e0319fedecf1f3e222558fce394a3ed4e39d0f750c11988"
+        },
+        "3.12/aarch64-pc-windows-msvc/default": {
+          "filename": "cpython-3.12.13+20260303-aarch64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "f003d15139e0baa39563388b7e29c44a6c4dda3987dbd7cec2050eca32450d4f"
+        },
+        "3.12/aarch64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.12.13+20260303-aarch64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "15c00b489fb89c7e3dc433800cd8b932ab3f8825870c1919fbe747f493edf81d"
+        },
+        "3.12/aarch64-unknown-linux-musl/default": {
+          "filename": "cpython-3.12.13+20260303-aarch64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "2e3e3fc934a597c5c0e95fe9093a89cd6d3e248f9d3f6a0e82dbfa923499bd9d"
+        },
+        "3.12/i686-pc-windows-msvc/default": {
+          "filename": "cpython-3.12.13+20260303-i686-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "af220242f3d2bebff6b9a01666895bb7198d7e4be608752f7e4007dd0fddfa22"
+        },
+        "3.12/x86_64-apple-darwin/default": {
+          "filename": "cpython-3.12.13+20260303-x86_64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "8ad52a15de26e67d53f5c14f338433c59d5a2711852adc59043a20ec8da71a52"
+        },
+        "3.12/x86_64-pc-windows-msvc/default": {
+          "filename": "cpython-3.12.13+20260303-x86_64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "43990976c8de6b72a7525cb509eedaf869a8dd116167e708af08bca50cd8ef00"
+        },
+        "3.12/x86_64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.12.13+20260303-x86_64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "4e5ac5a04afc4fe164e92e3844d6dbda03b33baeb62e032b5c9a8198280221e2"
+        },
+        "3.12/x86_64-unknown-linux-musl/default": {
+          "filename": "cpython-3.12.13+20260303-x86_64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.12.13",
+          "sha256": "4099347cfb11427ceb6fe40d1b9f2af9fee3a3a8915df0e439e13dfbe948b91e"
+        },
+        "3.13/aarch64-apple-darwin/default": {
+          "filename": "cpython-3.13.12+20260303-aarch64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "267592285674e21982d84f2cd0b56e13e63ce60c3e85ffb0d67a842edaf5b5e9"
+        },
+        "3.13/aarch64-apple-darwin/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-aarch64-apple-darwin-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "d152a8ec3a31a7b49772e70ff7fed1e7f6ec721497151b104532957744703d86"
+        },
+        "3.13/aarch64-pc-windows-msvc/default": {
+          "filename": "cpython-3.13.12+20260303-aarch64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "4cb0d143eeaf51582fa8292d00061fc201e41bf3ce5e2de814d0b273f73d4c25"
+        },
+        "3.13/aarch64-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-aarch64-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "33e4de818b5419f0b6c599ccfc98a0468c441f83e02d4e0ef18b4a632408dc57"
+        },
+        "3.13/aarch64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.13.12+20260303-aarch64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "3b88fc6dd6f0290f075353ca860b9dc48faca0d849a0a03c088883507ed63881"
+        },
+        "3.13/aarch64-unknown-linux-gnu/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-aarch64-unknown-linux-gnu-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "a2e320b8b7ec76f538f4414bb56927e0a35fb169a4748594b3b0946df0d8942b"
+        },
+        "3.13/aarch64-unknown-linux-musl/default": {
+          "filename": "cpython-3.13.12+20260303-aarch64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "c8f2e10261f327b3b9606c23c79788e1c909f0d703c4b06ebd59b318fa271c77"
+        },
+        "3.13/aarch64-unknown-linux-musl/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-aarch64-unknown-linux-musl-freethreaded+lto-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "5c71151ce936e495b0dc49fe3bdd67a9ec332542e2fc250257cd76276481103c"
+        },
+        "3.13/i686-pc-windows-msvc/default": {
+          "filename": "cpython-3.13.12+20260303-i686-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "202a933d5435eced5e92f474fac9480a82959de2b3ea5555569de9bda6f4af4f"
+        },
+        "3.13/i686-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-i686-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "e27287866347dd2cc1dc766174bb67f6b459cbadfbeff74c981abe7fe6cf86ba"
+        },
+        "3.13/x86_64-apple-darwin/default": {
+          "filename": "cpython-3.13.12+20260303-x86_64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "07833bcaf50c80065db8a21d7ae0459939d95e3cf399ce8f7df908ddfc4d275f"
+        },
+        "3.13/x86_64-apple-darwin/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-x86_64-apple-darwin-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "d603daefc04db99a764942a835497e52beebeb8797f7ac828826969e6f8ea165"
+        },
+        "3.13/x86_64-pc-windows-msvc/default": {
+          "filename": "cpython-3.13.12+20260303-x86_64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "61d5f9750e6971cf3bc91a1c8e7ab2eed1c22a34067f0762917bfde12b121f9f"
+        },
+        "3.13/x86_64-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-x86_64-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "5703d1e5fcd43d0ac3bce24e65d03a5684f3fec3625794ca9a0a47ad2ecbd0a1"
+        },
+        "3.13/x86_64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.13.12+20260303-x86_64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "ee1d08c3e6149343077d410d7de835a7a7dda8e2cec80df94f393e858a300055"
+        },
+        "3.13/x86_64-unknown-linux-gnu/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-x86_64-unknown-linux-gnu-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "8f1a00de7342d161bfefcb6bb90f50076b0c49e1ac4d4faa7fb303015369f310"
+        },
+        "3.13/x86_64-unknown-linux-musl/default": {
+          "filename": "cpython-3.13.12+20260303-x86_64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.13.12",
+          "sha256": "36f73e0b72ac670bd56c927a078e3e2ef0b1fef1d89a792088766bf1236815b7"
+        },
+        "3.13/x86_64-unknown-linux-musl/freethreaded": {
+          "filename": "cpython-3.13.12+20260303-x86_64-unknown-linux-musl-freethreaded+lto-full.tar.zst",
+          "full_version": "3.13.12",
+          "sha256": "6bae3d9f3c03448efe7e72aaf7eba1c4af4531ee22964876b36c1569e5123159"
+        },
+        "3.14/aarch64-apple-darwin/default": {
+          "filename": "cpython-3.14.3+20260303-aarch64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "adce81b366416e8d1b95c9c5483607282ae43c98fc155677020d20076d333fec"
+        },
+        "3.14/aarch64-apple-darwin/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-aarch64-apple-darwin-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "cedbfdb352b7b0dbdfd2e4dba11244a64665402c44099f36af9e22dc269dd0c0"
+        },
+        "3.14/aarch64-pc-windows-msvc/default": {
+          "filename": "cpython-3.14.3+20260303-aarch64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "f64e500abf0ff11b320cba756114caae6ea733c62af1c9516d28d92cf4223d74"
+        },
+        "3.14/aarch64-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-aarch64-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "5af1b60808d4e8df3838267086556e2518b24a71080a7c4dc0edf3ef6a5bd8c4"
+        },
+        "3.14/aarch64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.14.3+20260303-aarch64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "80030e336255241a76cd05c874b70a8840fef24e344907a4ae89f0f6c3c7daf6"
+        },
+        "3.14/aarch64-unknown-linux-gnu/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-aarch64-unknown-linux-gnu-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "9ca5169b62fdedbbeb1e01429e5ed75d0c89efb0dffb3d5924c58f667f365863"
+        },
+        "3.14/aarch64-unknown-linux-musl/default": {
+          "filename": "cpython-3.14.3+20260303-aarch64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "97b7e0182daf74f884456a4a24cf882d0296092c918939d25ed1e1f4edee0469"
+        },
+        "3.14/aarch64-unknown-linux-musl/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-aarch64-unknown-linux-musl-freethreaded+lto-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "ff4076086f55f83746d680792f8346037060453cf078feba233ba28e4b2a3514"
+        },
+        "3.14/i686-pc-windows-msvc/default": {
+          "filename": "cpython-3.14.3+20260303-i686-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "d969b1807fe6a3ebe9c1468c55331859d329119951ab01dc6ec5b2853c217a66"
+        },
+        "3.14/i686-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-i686-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "e3085abf12bdf84a91784915082eaffd4cac154acd9818aefc71a69e13bdaf24"
+        },
+        "3.14/x86_64-apple-darwin/default": {
+          "filename": "cpython-3.14.3+20260303-x86_64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "29469be54c9e471b916f0375f83836811b4df29dc98e0b7452ae9ec483a500a0"
+        },
+        "3.14/x86_64-apple-darwin/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-x86_64-apple-darwin-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "ff7ba9353fb4f6f923e5a0c30564e448cb678deb69ac58e7f4f3a78944b40806"
+        },
+        "3.14/x86_64-pc-windows-msvc/default": {
+          "filename": "cpython-3.14.3+20260303-x86_64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "201d5c13ee115e029bf6caa6bb17af2bfb3e4a3baf14c7f31e9145e2aa6571ef"
+        },
+        "3.14/x86_64-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-x86_64-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "7921cf0fa140f3714c4772b8af161ab463d0ad641ac35db0beff9d45273ab5f5"
+        },
+        "3.14/x86_64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.14.3+20260303-x86_64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "8070ec22c0ea164b826a57102f1bf1fa0b360e143ab3378b3c5eb4178bc0c26b"
+        },
+        "3.14/x86_64-unknown-linux-gnu/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-x86_64-unknown-linux-gnu-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "0629158c702d4ba732c722f24e5a775885e93915c7b04fe29cfb9c81e37f499f"
+        },
+        "3.14/x86_64-unknown-linux-musl/default": {
+          "filename": "cpython-3.14.3+20260303-x86_64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.14.3",
+          "sha256": "e72b682f652eb8ba71550a7aa4f267ddf3fe06b165a29acd4194dfff0b51ed4e"
+        },
+        "3.14/x86_64-unknown-linux-musl/freethreaded": {
+          "filename": "cpython-3.14.3+20260303-x86_64-unknown-linux-musl-freethreaded+lto-full.tar.zst",
+          "full_version": "3.14.3",
+          "sha256": "dc478897cecef7b6dfcd089b8a425e959885883d123ba4ce3e3ec1fcf5f9637a"
+        },
+        "3.15/aarch64-apple-darwin/default": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "7a6bb30a11361b58849ceeaf4d74f4085306f9b00de0c7f4703f9031cbb409ee"
+        },
+        "3.15/aarch64-apple-darwin/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-apple-darwin-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "c2c9679a505c94abb6e0dcbcb1a9ea2148fbcab5b443e9c8efac388e591233a8"
+        },
+        "3.15/aarch64-pc-windows-msvc/default": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "aafd627b816dd83cb9ae670383482f3aa166e8f8910ca946278c5cc22f96bff6"
+        },
+        "3.15/aarch64-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "62890d115b54d2456a74db09d3026834faee19ba1be257c287025b0e8ae6ad16"
+        },
+        "3.15/aarch64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "bc351efe2ef61f2d6fae1491b0d240f7616a7be28fcdad2d1644ce0429001ad6"
+        },
+        "3.15/aarch64-unknown-linux-gnu/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-unknown-linux-gnu-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "93792d31d2232f6bf27e08fbfe6aec221aab1a4aa42463ac879540d399b54bc2"
+        },
+        "3.15/aarch64-unknown-linux-musl/default": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "55fabc3bfa81d6248db65da659c8f728fdfe8aa5dcd9551a5b1eaef09bc05cbd"
+        },
+        "3.15/aarch64-unknown-linux-musl/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-aarch64-unknown-linux-musl-freethreaded+lto-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "497bbd7bc486a3092e003761f6a4fb9fd2c9854dea249042b330cb70d2ebf42a"
+        },
+        "3.15/i686-pc-windows-msvc/default": {
+          "filename": "cpython-3.15.0a6+20260303-i686-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "a49e43ea7971bb975e00f132bd45bc6834177997add3de7a07361a7449a10bda"
+        },
+        "3.15/i686-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-i686-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "4174719f384f3c6893c59e23ea88242c3ab9d84b7fffb9d1ed3a11e9d6a6a068"
+        },
+        "3.15/x86_64-apple-darwin/default": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-apple-darwin-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "3c25506d64f6b8e0c38bb66f8430332578a69343c1b27078b7f91d5919f2549a"
+        },
+        "3.15/x86_64-apple-darwin/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-apple-darwin-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "cf23826a427d19ea945965ba0e00a210b0cd96c3e7c2741ccf1174c18c37d5a6"
+        },
+        "3.15/x86_64-pc-windows-msvc/default": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-pc-windows-msvc-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "42690076ba8f6311b737b884f56217cab7d7287f3374ab8c629fd446913534d6"
+        },
+        "3.15/x86_64-pc-windows-msvc/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-pc-windows-msvc-freethreaded+pgo-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "8c3de05f4df81a3b482fd62daa14b7863df2b517a487b75661e37dfee845a4e6"
+        },
+        "3.15/x86_64-unknown-linux-gnu/default": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-unknown-linux-gnu-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "ac11f7e619c154e3d9b56186b461f52b4afc583a5524e7109686a7a9e1835b6d"
+        },
+        "3.15/x86_64-unknown-linux-gnu/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-unknown-linux-gnu-freethreaded+pgo+lto-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "9d95b1429958effe665c0dd7e2a9b8dfe1364b477637df87ddf372438adfa109"
+        },
+        "3.15/x86_64-unknown-linux-musl/default": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-unknown-linux-musl-install_only.tar.gz",
+          "full_version": "3.15.0a6",
+          "sha256": "427675a1e0e79051540cce0f1b450ca0d11a8897486aba03796a8881cadf831f"
+        },
+        "3.15/x86_64-unknown-linux-musl/freethreaded": {
+          "filename": "cpython-3.15.0a6+20260303-x86_64-unknown-linux-musl-freethreaded+lto-full.tar.zst",
+          "full_version": "3.15.0a6",
+          "sha256": "2b5d35017190248ebbbf8b24432ec730e496dc68b911308a0cd4c21d8181d090"
+        }
+      }
+    },
     "@@aspect_tools_telemetry+//:extension.bzl%telemetry": {
       "notice_version": "3"
     }

@@ -1,0 +1,42 @@
+load("//dnfo:defs.bzl", "dnfo_image")
+
+package(default_visibility = ["//visibility:public"])
+
+dnfo_image(
+    name = "minimal",
+    accounts = {
+        "groups": [
+            {
+                "gid": 65532,
+                "groupname": "nonroot",
+            },
+        ],
+        "users": [
+            {
+                "gid": 65532,
+                "uid": 65532,
+                "username": "nonroot",
+            },
+        ],
+    },
+    cmd = ["-l"],
+    config = "dnfo.yaml",
+    entrypoint = ["/bin/bash"],
+    env = {
+        "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "TERM": "xterm",
+    },
+    lock_only = False,
+    packages = [
+        "bash",
+        "coreutils",
+    ],
+    repositories = [{
+        "baseurl": "https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/$basearch/",
+        "gpgcheck": 1,
+        "gpgkey": "https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10",
+        "id": "baseos",
+        "name": "BaseOS",
+    }],
+    workdir = "/home",
+)

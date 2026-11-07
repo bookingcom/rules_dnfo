@@ -1,9 +1,17 @@
 load("@aspect_gazelle_prebuilt//:def.bzl", "aspect_gazelle")
 
+package(default_visibility = ["//visibility:public"])
+
 exports_files(["LICENSE"])
 
+# Internal repo gazelle target: manages Starlark files within the rules_dnfo repository.
 aspect_gazelle(
     name = "gazelle",
     languages = ["starlark"],
     with_check = True,
+)
+
+alias(
+    name = "update",
+    actual = "//dnfo:update",
 )
