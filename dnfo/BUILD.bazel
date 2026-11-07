@@ -1,12 +1,49 @@
+load("@aspect_gazelle_prebuilt//:def.bzl", "aspect_gazelle")
+load("@aspect_rules_py//py:defs.bzl", "py_binary")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
     "defs.bzl",
+    "extensions.bzl",
+    "gazelle.star",
 ])
+
+py_binary(
+    name = "update",
+    srcs = ["update.py"],
+    data = ["@buildifier_prebuilt//:buildozer"],
+    env = {
+        "BUILDOZER_BIN": "$(rlocationpath @buildifier_prebuilt//:buildozer)",
+    },
+    main = "update.py",
+)
+
+# Public API Gazelle target: exercises gazelle.star to manage dnfo_image targets.
+aspect_gazelle(
+    name = "gazelle",
+    extensions = [
+        "//dnfo:gazelle.star",
+    ],
+    languages = [
+        "starlark",
+    ],
+    with_check = True,
+)
 
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
+    deps = [
+        "//dnfo/private:dnfo_image",
+    ],
+)
+
+# gazelle:resolve starlark @dnf5-prebuilt//dnf5-prebuilt:extensions.bzl @dnf5-prebuilt//dnf5-prebuilt:extensions.bzl
+
+bzl_library(
+    name = "extensions",
+    srcs = ["extensions.bzl"],
+    deps = ["@dnf5-prebuilt//dnf5-prebuilt:extensions.bzl"],
 )

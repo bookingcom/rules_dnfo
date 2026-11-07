@@ -8,12 +8,61 @@ bazel_dep(name = "platforms_contrib", version = "1.0.0-alpha.0")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
 bazel_dep(name = "bazel_lib", version = "3.7.2")
 bazel_dep(name = "tar.bzl", version = "0.10.9")
+bazel_dep(name = "rules_img", version = "0.3.24")
 bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.28")
+bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.4")
+bazel_dep(name = "aspect_rules_py", version = "2.0.0-alpha.10")
+
+python = use_extension("@aspect_rules_py//py:extensions.bzl", "python_interpreters")
+python.toolchain(python_version = "3.13")
+use_repo(
+    python,
+    "python_3_13_aarch64_apple_darwin",
+    "python_3_13_aarch64_unknown_linux_gnu",
+    "python_3_13_x86_64_apple_darwin",
+    "python_3_13_x86_64_unknown_linux_gnu",
+    "python_interpreters",
+)
+
+register_toolchains("@python_interpreters//:all")
+
+# dnf5-prebuilt is not yet available in the Bazel Central Registry (BCR)
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.5")
+archive_override(
+    module_name = "dnf5-prebuilt",
+    integrity = "sha256-Plm67w2RlJ/trfQaAczblLpMa6zFjcMO3xDW5cHpp4Q=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.5",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.5/dnf5-prebuilt-v5.4.6.0.bcr.5.tar.gz"],
+)
+
+dnfo_test = use_extension(
+    "//dnfo:extensions.bzl",
+    "dnfo",
+    dev_dependency = True,
+)
+dnfo_test.lock(
+    name = "minimal_packages",
+    lockfile = "//examples/minimal:dnfo.lock.json",
+)
+use_repo(
+    dnfo_test,
+    "minimal_packages",
+)
 
 bsd_tar_toolchains = use_extension("@tar.bzl//tar:extensions.bzl", "toolchains")
 use_repo(bsd_tar_toolchains, "bsd_tar_toolchains")
 
 register_toolchains("@bsd_tar_toolchains//:all")
+
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
+http_file(
+    name = "ol10_gpg_key",
+    dev_dependency = True,
+    downloaded_file_path = "RPM-GPG-KEY-oracle-ol10.key",
+    sha256 = "9badfdf6c90098658e3154fed1b8d4d0eefd19c193982b27c68f6a73a1b21695",
+    urls = ["https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10"],
+)
 
 bazel_dep(name = "toolchains_buildbuddy", version = "0.0.4", dev_dependency = True)
 
