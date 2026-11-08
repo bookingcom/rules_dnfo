@@ -13,6 +13,7 @@ load(
 load("@rules_img//img:image.bzl", "image_manifest")
 load("@rules_img//img:layer.bzl", "layer_from_tar")
 load("@rules_img//img:load.bzl", "image_load")
+load("//dnfo/private:extract_base.bzl", "dnfo_extract_base")
 
 def _dnfo_repo_configs_impl(ctx):
     repositories = json.decode(ctx.attr.repositories_json)
@@ -80,6 +81,7 @@ def dnfo_image(
         keyring = [],
         base = None,
         base_rpmdb = None,
+        base_repos = None,
         include_skeleton = None,
         **kwargs):
     """Builds an OCI container image from RPM packages declared in a dnfo YAML specification.
@@ -115,6 +117,8 @@ def dnfo_image(
       gpgcheck: Whether to verify package GPG signatures.
       keyring: GPG key URLs or labels.
       base: Optional base container image target to inherit layers and configs from.
+      base_rpmdb: Optional base rpmdb.sqlite file/target to mark packages on top of and solve against.
+      base_repos: Optional base repository configs target(s) inherited from parent or base image.
       include_skeleton: Optional boolean to explicitly force or omit the linux_skeleton
           directory layer. When None (default), skeleton is automatically omitted if base
           is provided or if 'filesystem' is in packages.
@@ -122,7 +126,24 @@ def dnfo_image(
     """
     visibility = kwargs.get("visibility", ["//visibility:public"])
 
-    # 1. Repository configs, dnf_config, and rpm_lock generation via dnf5-prebuilt
+    # 1. Base image extraction (for external rules_img base images without pre-declared base_rpmdb)
+    extracted_repos = None
+    if base and not base_rpmdb:
+        extract_name = name + "_base_extract"
+        rpmdb_file = name + "_base_rpmdb.sqlite"
+        repos_file = name + "_base.repo"
+        dnfo_extract_base(
+            name = extract_name,
+            architecture = architecture,
+            image = base,
+            out_repos = repos_file,
+            out_rpmdb = rpmdb_file,
+            visibility = ["//visibility:private"],
+        )
+        base_rpmdb = ":" + rpmdb_file
+        extracted_repos = ":" + repos_file
+
+    # 2. Repository configs, dnf_config, and rpm_lock generation via dnf5-prebuilt
     lockfile_name = config.rsplit(".", 1)[0] + ".lock.json" if "." in config else (config + ".lock.json")
     arch_list = [architecture, "noarch"] if architecture != "noarch" else ["noarch"]
 
@@ -144,9 +165,18 @@ def dnfo_image(
         _dnfo_repo_configs(
             name = name + "_repos",
             repositories_json = json.encode(dict_repos),
-            visibility = ["//visibility:private"],
+            visibility = visibility,
         )
         repo_configs.append(":" + name + "_repos")
+
+    if base_repos:
+        if type(base_repos) == "list":
+            repo_configs.extend(base_repos)
+        else:
+            repo_configs.append(base_repos)
+
+    if extracted_repos:
+        repo_configs.append(extracted_repos)
 
     if repo_configs and packages:
         dnf_config(
@@ -179,12 +209,13 @@ def dnfo_image(
     if lock_only:
         return
 
-    # 2. RPMDB and RPMs layer via dnf5-prebuilt
+    # 3. RPMDB and RPMs layer via dnf5-prebuilt
     rpms_label = contents if contents else ("@" + name + "_packages//:rpms")
     rpm_mark(
         name = name + "_rpmdb",
+        base_rpmdb = base_rpmdb,
         rpms = [rpms_label],
-        visibility = ["//visibility:private"],
+        visibility = visibility,
     )
 
     rpm_layer(

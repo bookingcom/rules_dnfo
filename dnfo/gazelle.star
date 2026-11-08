@@ -13,6 +13,8 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "accounts",
         "architecture",
         "base",
+        "base_rpmdb",
+        "base_repos",
         "include_skeleton",
     ],
 })
@@ -41,6 +43,43 @@ def _target_name(rel, config_name, total_files):
     if stem == "dnfo":
         return base
     return stem.replace(".", "_").replace("-", "_")
+
+def _resolve_include_label(rel, inc):
+    # If already a label
+    if inc.startswith("//") or inc.startswith(":"):
+        if not inc.endswith(".yaml") and not inc.endswith(".yml"):
+            return inc
+    # If it's a repo-absolute file path (e.g. //pkg:parent.dnfo.yaml or //pkg/parent.dnfo.yaml)
+    if inc.startswith("//"):
+        if ":" in inc:
+            pkg, fname = inc[2:].split(":", 1)
+        else:
+            pkg, fname = inc[2:].rsplit("/", 1)
+        target = _target_name(pkg, fname, 1)
+        return "//" + pkg + ":" + target
+
+    # Relative path within same package or sub/parent package
+    parts = inc.split("/")
+    fname = parts[-1]
+    if len(parts) == 1:
+        target = _target_name(rel, fname, 1)
+        return ":" + target
+
+    rel_dir_parts = [p for p in rel.split("/") if p] if rel else []
+    for p in parts[:-1]:
+        if p == "." or not p:
+            continue
+        elif p == "..":
+            if rel_dir_parts:
+                rel_dir_parts.pop()
+        else:
+            rel_dir_parts.append(p)
+    target_pkg = "/".join(rel_dir_parts)
+    target = _target_name(target_pkg, fname, 1)
+    if target_pkg:
+        return "//" + target_pkg + ":" + target
+    else:
+        return "//:" + target
 
 def _prepare(cfg):
     return aspect.PrepareResult(
@@ -73,6 +112,18 @@ def _declare(ctx):
         attrs = {
             "config": config_name,
         }
+
+        # Apko-style file inheritance (include: <path>)
+        include = data.get("include")
+        if include:
+            inc_list = include if type(include) == "list" else [include]
+            for inc in inc_list:
+                if type(inc) != "string":
+                    continue
+                parent_target = _resolve_include_label(ctx.rel, inc)
+                attrs["base"] = parent_target
+                attrs["base_rpmdb"] = parent_target + "_rpmdb"
+                attrs["base_repos"] = parent_target + "_repos"
 
         # Contents: packages and repositories
         contents = data.get("contents")
@@ -132,11 +183,39 @@ def _declare(ctx):
         # Base image
         base = data.get("base")
         if base and type(base) == "string":
-            attrs["base"] = base
+            if base.startswith("//") or base.startswith(":"):
+                attrs["base"] = base
+            elif base.startswith("@"):
+                attrs["base"] = base
+            elif "/" in base or ":" in base:
+                fail(
+                    ("Base image '%s' in %s is invalid. " % (base, s.path)) +
+                    "External base images must be pulled via rules_img in MODULE.bazel. " +
+                    "Please pull the image in MODULE.bazel using rules_img (e.g. images.pull(name = \"%s\", ...)) " % base.split("/")[0] +
+                    "and reference it here using base: <image_name>."
+                )
+            else:
+                attrs["base"] = "@" + base + "//:image"
+                pkg_prefix = "//" + ctx.rel if ctx.rel else "//"
+                print(
+                    "\n[gazelle-dnfo] External base image '%s' declared for %s:%s.\n" % (base, pkg_prefix, name) +
+                    "Ensure it is pulled via rules_img in your MODULE.bazel:\n\n" +
+                    'images = use_extension("@rules_img//img:extensions.bzl", "images")\n' +
+                    'images.pull(\n' +
+                    '    name = "%s",\n' % base +
+                    '    digest = "...",\n' +
+                    '    repository = "...",\n' +
+                    ')\n' +
+                    'use_repo(images, "%s")\n' % base,
+                )
 
         base_rpmdb = data.get("base_rpmdb", data.get("base-rpmdb"))
         if base_rpmdb and type(base_rpmdb) == "string":
             attrs["base_rpmdb"] = base_rpmdb
+
+        base_repos = data.get("base_repos", data.get("base-repos"))
+        if base_repos and type(base_repos) == "string":
+            attrs["base_repos"] = base_repos
 
         # Include skeleton override
         inc_skel = data.get("include_skeleton", data.get("include-skeleton"))
