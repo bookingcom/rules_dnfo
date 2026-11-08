@@ -39,10 +39,5 @@ jobs:
         run: bazel --bazelrc=.github/workflows/ci.bazelrc build //...
       - name: Test
         run: bazel --bazelrc=.github/workflows/ci.bazelrc test //...
-      - name: Build dnfo dist
-        run: |
-          rm -rf dist && mkdir -p dist
-          bazel --bazelrc=.github/workflows/ci.bazelrc build -c opt //cmd/dnfo:dist
-          cp -f -L bazel-bin/cmd/dnfo/dnfo-*.tar.gz dist/
       - name: Check Starlark files with gazelle.check
         run: bazel --bazelrc=.github/workflows/ci.bazelrc run //:gazelle.check
