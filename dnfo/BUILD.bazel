@@ -27,7 +27,7 @@ aspect_gazelle(
         "//dnfo:gazelle.star",
     ],
     languages = [
-        "starlark",
+        "orion",
     ],
     with_check = True,
 )
