@@ -1,17 +1,19 @@
 # rules_dnfo
 
-Declarative, hermetic container image builder for Bazel using **DNF5** and **RPM** packages.
+Declarative, hermetic container image builder for Bazel using **DNF5**, **RPM** packages, and **rules_img**.
 
-Inspired by [rules_apko](https://github.com/chainguard-dev/rules_apko), `rules_dnfo` lets you construct lightweight, secure OCI and Docker-compatible container images directly from RPM package repositories without needing Dockerfiles or root daemons.
+Inspired by [rules_apko](https://github.com/chainguard-dev/rules_apko), `rules_dnfo` lets you construct lightweight, reproducible OCI and Docker-compatible container images directly from RPM package repositories without needing Dockerfiles, virtualization, or root daemons.
 
 ## Features
 
-- **Declarative Image Specifications**: Define packages, repositories, accounts, entrypoints, and environment variables in a clean YAML syntax similar to `apko.yaml`.
-- **Hermetic DNF5 Solver**: Resolves transitive package dependencies with [dnf5-prebuilt](https://github.com/bookingcom/dnf5-prebuilt).
-- **Reproducible Lockfiles**: Locks all resolved packages with SRI integrity hashes into `dnfo.lock.json`.
-- **One-Command Lock Updates**: Automatically generates companion `.lock` targets (`bazel run //path/to:image.lock`).
-- **Direct OCI & Tarball Outputs**: Outputs OCI directory layouts or container layer tarballs ready for container runtimes or rulesets like `rules_oci` / `rules_img`.
-- **Multi-Platform Prebuilts & From-Source Builds**: Precompiled binaries across `linux_amd64`, `linux_arm64`, `osx_amd64`, and `osx_arm64`, with source build fallback.
+- **Declarative Image Specifications**: Define packages, repositories, accounts, entrypoints, and environment variables in clean YAML syntax (`*dnfo*.ya?ml`).
+- **Gazelle-Driven 3-Phase Workflow**: Orion Gazelle extension (`gazelle-dnfo`) generates and maintains `BUILD.bazel` targets automatically.
+- **Hermetic DNF5 Dependency Solving**: Transitive RPM dependency resolution and lockfile generation powered by [dnf5-prebuilt](https://github.com/bookingcom/dnf5-prebuilt).
+- **Reproducible Lockfiles**: Locks resolved RPM packages with SRI integrity hashes into `dnfo.lock.json`.
+- **GPG Key Verification**: RPM package authenticity verified via GPG keys through `rpm_layer`.
+- **Fast Layer Assembly**: Seamless integration with `rules_img` (`rpm_layer`, `linux_skeleton`, `etc_passwd`, `image_load`) for multi-layer container assembly and instant local image loading (`bazel run //path/to:image.load`).
+
+---
 
 ## Installation
 
@@ -21,28 +23,46 @@ Add to your `MODULE.bazel`:
 bazel_dep(name = "rules_dnfo", version = "0.0.1")
 
 # dnf5-prebuilt dependency override (until published to BCR)
-bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.3")
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.5")
 archive_override(
     module_name = "dnf5-prebuilt",
-    integrity = "sha256-Lsvj4dkCXXnGO7+cX4ZNAAmkrN6fLgHkYn1R0jkt1zc=",
-    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.3",
-    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.3/dnf5-prebuilt-v5.4.6.0.bcr.3.tar.gz"],
+    integrity = "sha256-Plm67w2RlJ/trfQaAczblLpMa6zFjcMO3xDW5cHpp4Q=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.5",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.5/dnf5-prebuilt-v5.4.6.0.bcr.5.tar.gz"],
 )
-
-dnf5 = use_extension("@dnf5-prebuilt//dnf5-prebuilt:extensions.bzl", "dnf5")
-dnf5.toolchains()
-use_repo(dnf5, "dnf5_toolchains")
-register_toolchains("@dnf5_toolchains//:all")
-
-dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")
-dnfo.toolchains()
-use_repo(dnfo, "dnfo_toolchains")
-register_toolchains("@dnfo_toolchains//:all")
 ```
 
-## Quick Start
+> [!NOTE]
+> Dependencies like `rules_img`, `aspect_gazelle_prebuilt`, `buildifier_prebuilt`, and prebuilt `dnf5` toolchains are brought in transitively by `rules_dnfo`.
 
-### 1. Define your container in `dnfo.yaml`
+To configure Gazelle in your root `BUILD.bazel` (aliased as `gazelle-dnfo` so it does not collide with existing `//:gazelle` targets):
+
+```starlark
+alias(
+    name = "gazelle-dnfo",
+    actual = "@rules_dnfo//dnfo:gazelle",
+)
+
+alias(
+    name = "gazelle-dnfo.check",
+    actual = "@rules_dnfo//dnfo:gazelle.check",
+)
+
+alias(
+    name = "update",
+    actual = "@rules_dnfo//dnfo:update",
+)
+```
+
+---
+
+## The 3-Phase Image Introduction Workflow
+
+Introducing a new container image is an automated 3-phase process orchestrated by `gazelle-dnfo` and `dnf5-prebuilt`.
+
+### Step 1: Generate the BUILD Skeleton
+
+Create a `dnfo.yaml` (or any `*dnfo*.yaml` / `*dnfo*.yml` file) in your package:
 
 ```yaml
 contents:
@@ -50,10 +70,10 @@ contents:
     - id: baseos
       name: BaseOS
       baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/$basearch/
-      gpgcheck: 0
+      gpgcheck: 1
+      gpgkey: https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10
   packages:
     - bash
-    - coreutils
     - curl
 
 entrypoint:
@@ -80,34 +100,77 @@ archs:
   - x86_64
 ```
 
-### 2. Declare the image in `BUILD.bazel`
+Run Gazelle:
+
+```bash
+bazel run //:gazelle-dnfo
+```
+
+Gazelle detects the configuration, parses the repositories and packages, generates `BUILD.bazel` with `lock_only = True`, and prints instructions for the next steps.
+
+> [!NOTE]
+> Setting `lock_only = True` initially declares only the `.lock` target, preventing repo-wide commands (`bazel build //...` or `bazel test //...`) from failing with missing package repository errors before the lock file has been generated and declared in `MODULE.bazel`.
+
+### Step 2: Generate the Lockfile
+
+Run the companion lock target generated in your package:
+
+```bash
+bazel run //path/to:image.lock
+```
+
+This invokes `dnf5-prebuilt` to resolve all transitive dependencies and outputs `dnfo.lock.json` with SRI integrity hashes.
+
+### Step 3: Register Lock in MODULE.bazel and Flip Flag
+
+Register the generated lockfile in `MODULE.bazel`:
 
 ```starlark
-load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
-
-dnfo_image(
-    name = "my_image",
-    config = "dnfo.yaml",
-    architecture = "x86_64",
-    output = "oci",
+dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")
+dnfo.lock(
+    name = "image_packages",
+    lockfile = "//path/to:dnfo.lock.json",
 )
+use_repo(dnfo, "image_packages")
 ```
 
-### 3. Generate or refresh the lockfile
-
-Run the automatically generated `.lock` companion target:
+Run Gazelle:
 
 ```bash
-bazel run //:my_image.lock
+bazel run //:gazelle-dnfo
 ```
 
-This writes or updates `dnfo.lock.json` in the workspace directory.
+Gazelle detects that `dnfo.lock.json` is present on disk and flips `lock_only = False` in `BUILD.bazel`, enabling the complete image build pipeline.
 
-### 4. Build the container image
+---
+
+### Automated Onboarding & Update Tool
+
+Instead of performing the steps manually, `rules_dnfo` provides an automated tool that orchestrates the entire workflow (Gazelle skeleton generation, lockfile generation via `dnf5-prebuilt`, `MODULE.bazel` registration via `buildozer`, and lock flag flipping):
 
 ```bash
-bazel build //:my_image
+bazel run @rules_dnfo//dnfo:update
 ```
+
+When new packages or repositories are added to any `dnfo.yaml`, running this command automatically synchronizes the build targets and refreshes the lockfiles.
+
+---
+
+## Building and Running Images
+
+Once enabled, build the container image target:
+
+```bash
+bazel build //path/to:image
+```
+
+Or load it directly into Docker/Podman:
+
+```bash
+bazel run //path/to:image.load
+```
+
+---
 
 ## License
 

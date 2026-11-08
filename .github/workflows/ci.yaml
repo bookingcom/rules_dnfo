@@ -41,3 +41,5 @@ jobs:
         run: bazel --bazelrc=.github/workflows/ci.bazelrc test //...
       - name: Check Starlark files with gazelle.check
         run: bazel --bazelrc=.github/workflows/ci.bazelrc run //:gazelle.check
+      - name: Run E2E 3-phase flow test
+        run: ./e2e/generation_flow/run_test.sh
