@@ -55,7 +55,7 @@ jobs:
           for f in dist/*.tar.gz; do
             cat "${{ steps.attest.outputs.bundle-path }}" | jq --compact-output > "${f}.intoto.jsonl"
           done
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.TAG }}
           body_path: release_notes.md
