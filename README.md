@@ -223,9 +223,9 @@ To build on top of an external container image (such as Red Hat UBI, Fedora, Cen
    ```
 
 3. **Automatic Extraction**:
-   When `base: <image_name>` is used, `rules_dnfo` invokes `dnfo_extract_base` to hermetically inspect the base image layers:
-   - Extracts `/var/lib/rpm/rpmdb.sqlite` from the base image layers and passes it to `rpm_lock` and `rpm_mark`.
-   - Extracts any `/etc/yum.repos.d/*.repo` files from the base image and configures them in `dnf_config`.
+   When `base: <image_name>` is used, `rules_dnfo` uses `image_extract` from `rules_containers_util` (which flattens the image using `rules_img` and extracts target files):
+   - Extracts `rpmdb.sqlite` from the base image (`/var/lib/rpm/rpmdb.sqlite` by default, or configurable via `base_rpmdb_file`) and passes it to `rpm_lock` and `rpm_mark`.
+   - Optionally extracts base repository configurations (via `base_repo_file` / `base_repos`) and configures them in `dnf_config`.
    - Stacks the newly assembled RPM layer on top of `@<image_name>//:image` using `rules_img`.
 
 > [!NOTE]

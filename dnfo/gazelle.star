@@ -14,7 +14,9 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "architecture",
         "base",
         "base_rpmdb",
+        "base_rpmdb_file",
         "base_repos",
+        "base_repo_file",
         "include_skeleton",
     ],
 })
@@ -213,9 +215,17 @@ def _declare(ctx):
         if base_rpmdb and type(base_rpmdb) == "string":
             attrs["base_rpmdb"] = base_rpmdb
 
+        base_rpmdb_file = data.get("base_rpmdb_file", data.get("base-rpmdb-file"))
+        if base_rpmdb_file and type(base_rpmdb_file) == "string":
+            attrs["base_rpmdb_file"] = base_rpmdb_file
+
         base_repos = data.get("base_repos", data.get("base-repos"))
         if base_repos and type(base_repos) == "string":
             attrs["base_repos"] = base_repos
+
+        base_repo_file = data.get("base_repo_file", data.get("base-repo-file"))
+        if base_repo_file and type(base_repo_file) == "string":
+            attrs["base_repo_file"] = base_repo_file
 
         # Include skeleton override
         inc_skel = data.get("include_skeleton", data.get("include-skeleton"))

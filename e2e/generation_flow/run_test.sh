@@ -44,6 +44,14 @@ archive_override(
     urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.5/dnf5-prebuilt-v5.4.6.0.bcr.5.tar.gz"],
 )
 
+bazel_dep(name = "rules_containers_util", version = "0.0.5")
+archive_override(
+    module_name = "rules_containers_util",
+    integrity = "sha256-o/GHGK/6FhfkjXs02MnVKotjbSviI/PQqxaYLZn2CBg=",
+    strip_prefix = "rules_containers_util-0.0.5",
+    urls = ["https://github.com/bookingcom/rules_containers_util/releases/download/v0.0.5/rules_containers_util-v0.0.5.tar.gz"],
+)
+
 bazel_dep(name = "tar.bzl", version = "0.10.9")
 
 bsd_tar_toolchains = use_extension("@tar.bzl//tar:extensions.bzl", "toolchains")
