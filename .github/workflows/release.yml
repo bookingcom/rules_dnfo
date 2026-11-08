@@ -23,7 +23,7 @@ jobs:
     env:
       TAG: ${{ inputs.tag_name || github.ref_name }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ env.TAG }}
           fetch-depth: 0
@@ -31,14 +31,14 @@ jobs:
         run: .github/workflows/release_prep.sh "$TAG" >release_notes.md
       - name: Attest build provenance
         id: attest
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-path: |
             rules_dnfo-*.tar.gz
       - name: Generate attestation assets
         run: |
           cat "${{ steps.attest.outputs.bundle-path }}" | jq --compact-output > "rules_dnfo-${TAG}.tar.gz.intoto.jsonl"
-      - uses: softprops/action-gh-release@v3
+      - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         with:
           tag_name: ${{ env.TAG }}
           body_path: release_notes.md
