@@ -19,7 +19,7 @@ jobs:
       BUILDBUDDY_ENDPOINT: ${{ vars.BUILDBUDDY_ENDPOINT }}
       BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: bazel-contrib/setup-bazel@0.19.1
         with:
           bazelisk-cache: true
