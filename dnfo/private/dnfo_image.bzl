@@ -13,7 +13,7 @@ load(
 load("@rules_img//img:image.bzl", "image_manifest")
 load("@rules_img//img:layer.bzl", "layer_from_tar")
 load("@rules_img//img:load.bzl", "image_load")
-load("//dnfo/private:extract_base.bzl", "dnfo_extract_base")
+load("@rules_containers_util//containers:defs.bzl", "image_extract")
 
 def _dnfo_repo_configs_impl(ctx):
     repositories = json.decode(ctx.attr.repositories_json)
@@ -81,7 +81,9 @@ def dnfo_image(
         keyring = [],
         base = None,
         base_rpmdb = None,
+        base_rpmdb_file = None,
         base_repos = None,
+        base_repo_file = None,
         include_skeleton = None,
         **kwargs):
     """Builds an OCI container image from RPM packages declared in a dnfo YAML specification.
@@ -126,22 +128,33 @@ def dnfo_image(
     """
     visibility = kwargs.get("visibility", ["//visibility:public"])
 
-    # 1. Base image extraction (for external rules_img base images without pre-declared base_rpmdb)
+    # 1. Base image extraction (using rules_containers_util image_extract for base images)
     extracted_repos = None
     if base and not base_rpmdb:
-        extract_name = name + "_base_extract"
-        rpmdb_file = name + "_base_rpmdb.sqlite"
-        repos_file = name + "_base.repo"
-        dnfo_extract_base(
-            name = extract_name,
-            architecture = architecture,
+        extract_rpmdb_name = name + "_base_rpmdb"
+        platform_str = "linux/amd64" if architecture == "x86_64" else ("linux/arm64" if architecture == "aarch64" else None)
+        image_extract(
+            name = extract_rpmdb_name,
+            file = base_rpmdb_file or "/usr/lib/sysimage/rpm/rpmdb.sqlite",
             image = base,
-            out_repos = repos_file,
-            out_rpmdb = rpmdb_file,
+            out = name + "_base_rpmdb.sqlite",
+            platform = platform_str,
             visibility = ["//visibility:private"],
         )
-        base_rpmdb = ":" + rpmdb_file
-        extracted_repos = ":" + repos_file
+        base_rpmdb = ":" + extract_rpmdb_name
+
+    if base and base_repo_file:
+        extract_repo_name = name + "_base_repo"
+        platform_str = "linux/amd64" if architecture == "x86_64" else ("linux/arm64" if architecture == "aarch64" else None)
+        image_extract(
+            name = extract_repo_name,
+            file = base_repo_file,
+            image = base,
+            out = name + "_base.repo",
+            platform = platform_str,
+            visibility = ["//visibility:private"],
+        )
+        extracted_repos = ":" + extract_repo_name
 
     # 2. Repository configs, dnf_config, and rpm_lock generation via dnf5-prebuilt
     lockfile_name = config.rsplit(".", 1)[0] + ".lock.json" if "." in config else (config + ".lock.json")
