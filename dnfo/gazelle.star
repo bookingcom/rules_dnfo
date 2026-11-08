@@ -134,6 +134,10 @@ def _declare(ctx):
         if base and type(base) == "string":
             attrs["base"] = base
 
+        base_rpmdb = data.get("base_rpmdb", data.get("base-rpmdb"))
+        if base_rpmdb and type(base_rpmdb) == "string":
+            attrs["base_rpmdb"] = base_rpmdb
+
         # Include skeleton override
         inc_skel = data.get("include_skeleton", data.get("include-skeleton"))
         if inc_skel != None and type(inc_skel) == "bool":
