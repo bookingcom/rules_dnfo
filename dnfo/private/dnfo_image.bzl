@@ -79,6 +79,7 @@ def dnfo_image(
         gpgcheck = True,
         keyring = [],
         base = None,
+        base_rpmdb = None,
         include_skeleton = None,
         **kwargs):
     """Builds an OCI container image from RPM packages declared in a dnfo YAML specification.
@@ -160,6 +161,7 @@ def dnfo_image(
         rpm_lock(
             name = name + "_generated_lock",
             arch = arch_list,
+            base_rpmdb = base_rpmdb,
             config = ":" + name + "_dnf_config",
             packages = packages,
             tags = ["no-remote-cache", "no-remote-exec", "requires-network"],
