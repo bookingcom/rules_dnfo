@@ -18,6 +18,7 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "base_repos",
         "base_repo_file",
         "include_skeleton",
+        "files",
     ],
 })
 
@@ -83,6 +84,39 @@ def _resolve_include_label(rel, inc):
     else:
         return "//:" + target
 
+def _resolve_file_label(rel, src):
+    if not src:
+        return src
+
+    # If already a label
+    if src.startswith("@") or src.startswith("//") or src.startswith(":"):
+        return src
+
+    if src.startswith("./"):
+        src = src[2:]
+
+    # If it has path traversal ../
+    if src.startswith("../") or "/../" in src:
+        parts = src.split("/")
+        fname = parts[-1]
+        rel_dir_parts = [p for p in rel.split("/") if p] if rel else []
+        for p in parts[:-1]:
+            if p == "." or not p:
+                continue
+            elif p == "..":
+                if rel_dir_parts:
+                    rel_dir_parts.pop()
+            else:
+                rel_dir_parts.append(p)
+        target_pkg = "/".join(rel_dir_parts)
+        if target_pkg:
+            return "//" + target_pkg + ":" + fname
+        else:
+            return "//:" + fname
+
+    # Simple file or subpath within current package
+    return ":" + src
+
 def _prepare(cfg):
     return aspect.PrepareResult(
         sources = [aspect.SourceGlobs(*_DNFO_GLOBS)],
@@ -128,6 +162,7 @@ def _declare(ctx):
                 attrs["base_repos"] = parent_target + "_repos"
 
         # Contents: packages and repositories
+        pkgs = None
         contents = data.get("contents")
         if contents and type(contents) == "dict":
             pkgs = contents.get("packages")
@@ -232,7 +267,85 @@ def _declare(ctx):
         if inc_skel != None and type(inc_skel) == "bool":
             attrs["include_skeleton"] = inc_skel
 
-        if has_lock:
+        # Files installation support
+        files_data = data.get("files", data.get("install"))
+        if not files_data and contents and type(contents) == "dict":
+            files_data = contents.get("files", contents.get("install"))
+
+        if files_data:
+            if type(files_data) == "dict":
+                has_metadata = False
+                for v in files_data.values():
+                    if type(v) == "dict":
+                        has_metadata = True
+                        break
+
+                if not has_metadata:
+                    files_dict = {}
+                    for path, src in files_data.items():
+                        if type(src) == "string":
+                            p = path if path.startswith("/") else ("/" + path)
+                            files_dict[p] = _resolve_file_label(ctx.rel, src)
+                    if files_dict:
+                        attrs["files"] = files_dict
+                else:
+                    files_dict = {}
+                    for path, item in files_data.items():
+                        p = path if path.startswith("/") else ("/" + path)
+                        if type(item) == "string":
+                            files_dict[p] = _resolve_file_label(ctx.rel, item)
+                        elif type(item) == "dict":
+                            src = item.get("source", item.get("src"))
+                            entry = {"source": _resolve_file_label(ctx.rel, src)}
+                            for k in ["mode", "uid", "gid", "uname", "gname", "mtime", "permissions"]:
+                                if k in item:
+                                    entry[k] = item[k]
+                            files_dict[p] = entry
+                    if files_dict:
+                        attrs["files"] = files_dict
+
+            elif type(files_data) == "list":
+                has_metadata = False
+                for item in files_data:
+                    if type(item) == "dict":
+                        for k in ["mode", "uid", "gid", "uname", "gname", "mtime", "permissions"]:
+                            if k in item:
+                                has_metadata = True
+                                break
+
+                if not has_metadata:
+                    files_dict = {}
+                    for item in files_data:
+                        if type(item) == "dict":
+                            dest = item.get("path", item.get("destination", item.get("dest")))
+                            src = item.get("source", item.get("src"))
+                            if dest and src:
+                                p = dest if dest.startswith("/") else ("/" + dest)
+                                files_dict[p] = _resolve_file_label(ctx.rel, src)
+                    if files_dict:
+                        attrs["files"] = files_dict
+                else:
+                    files_list = []
+                    for item in files_data:
+                        if type(item) == "dict":
+                            dest = item.get("path", item.get("destination", item.get("dest")))
+                            src = item.get("source", item.get("src"))
+                            if dest and src:
+                                p = dest if dest.startswith("/") else ("/" + dest)
+                                entry = {
+                                    "path": p,
+                                    "source": _resolve_file_label(ctx.rel, src),
+                                }
+                                for k in ["mode", "uid", "gid", "uname", "gname", "mtime", "permissions"]:
+                                    if k in item:
+                                        entry[k] = item[k]
+                                files_list.append(entry)
+                    if files_list:
+                        attrs["files"] = files_list
+
+        if not pkgs:
+            attrs["lock_only"] = False
+        elif has_lock:
             attrs["lock_only"] = False
             pkg_prefix = "//" + ctx.rel if ctx.rel else "//"
             repo_name = name + "_packages"

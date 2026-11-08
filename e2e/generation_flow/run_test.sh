@@ -381,4 +381,134 @@ EOF
 INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //ext_base:from_base
 echo "Phase 8b verified: extracted base rpmdb and repos from base image and built layered image successfully."
 
+echo ""
+echo "--- Phase 9: Installing files from repository and pulled by Bazel into image paths ---"
+
+# 1. Setup a repository extension that pulls an external file
+cat > repo_ext.bzl <<EOF
+def _pulled_file_repo_impl(rctx):
+    rctx.file("BUILD.bazel", 'exports_files(["pulled_tool.sh"])\n')
+    rctx.file("pulled_tool.sh", "#!/bin/sh\necho 'hello from pulled tool'\n")
+
+_pulled_file_repo = repository_rule(implementation = _pulled_file_repo_impl)
+
+def _pulled_file_ext_impl(mctx):
+    _pulled_file_repo(name = "pulled_repo")
+
+pulled_file_ext = module_extension(implementation = _pulled_file_ext_impl)
+EOF
+
+cat >> MODULE.bazel <<EOF
+
+pulled_ext = use_extension("//:repo_ext.bzl", "pulled_file_ext")
+use_repo(pulled_ext, "pulled_repo")
+EOF
+
+# 2. Test 9a: Dict format with repository file and Bazel-pulled external file
+mkdir -p test_files
+echo "hello from local config" > test_files/local_config.txt
+
+cat > test_files/dnfo.yaml <<EOF
+files:
+  /etc/local_config.txt: local_config.txt
+  /usr/local/bin/pulled_tool.sh:
+    source: "@pulled_repo//:pulled_tool.sh"
+    mode: "0755"
+EOF
+
+# 3. Test 9b: List format with permissions, combined with packages on top of testimage
+mkdir -p test_files_list
+echo "server_setting = enabled" > test_files_list/app.conf
+
+cat > test_files_list/dnfo.yaml <<EOF
+base: "//testimage:testimage"
+files:
+  - source: app.conf
+    path: /etc/app.conf
+    mode: "0644"
+  - source: "@pulled_repo//:pulled_tool.sh"
+    path: /usr/bin/pulled_tool
+    mode: "0755"
+EOF
+
+# Run Gazelle to generate BUILD.bazel files
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+echo "Generated test_files/BUILD.bazel:"
+cat test_files/BUILD.bazel
+
+if ! grep -q '":local_config.txt"' test_files/BUILD.bazel; then
+  echo "ERROR: Phase 9 failed: expected ':local_config.txt' in test_files/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q '"@pulled_repo//:pulled_tool.sh"' test_files/BUILD.bazel; then
+  echo "ERROR: Phase 9 failed: expected '@pulled_repo//:pulled_tool.sh' in test_files/BUILD.bazel" >&2
+  exit 1
+fi
+
+echo "Generated test_files_list/BUILD.bazel:"
+cat test_files_list/BUILD.bazel
+
+if ! grep -q '":app.conf"' test_files_list/BUILD.bazel; then
+  echo "ERROR: Phase 9 failed: expected ':app.conf' in test_files_list/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q '"@pulled_repo//:pulled_tool.sh"' test_files_list/BUILD.bazel; then
+  echo "ERROR: Phase 9 failed: expected '@pulled_repo//:pulled_tool.sh' in test_files_list/BUILD.bazel" >&2
+  exit 1
+fi
+
+# Build image targets
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_files:all //test_files_list:all
+
+# Extract installed files using rules_containers_util image_extract to verify contents
+mkdir -p extract_verify
+cat > extract_verify/BUILD.bazel <<EOF
+load("@rules_containers_util//containers:defs.bzl", "image_extract")
+
+image_extract(
+    name = "extract_local_config",
+    file = "/etc/local_config.txt",
+    image = "//test_files:test_files",
+    out = "extracted_local_config.txt",
+)
+
+image_extract(
+    name = "extract_pulled_tool",
+    file = "/usr/local/bin/pulled_tool.sh",
+    image = "//test_files:test_files",
+    out = "extracted_pulled_tool.sh",
+)
+
+image_extract(
+    name = "extract_list_app_conf",
+    file = "/etc/app.conf",
+    image = "//test_files_list:test_files_list",
+    out = "extracted_app.conf",
+)
+EOF
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //extract_verify:all
+
+EXTRACTED_LOCAL="$(bazel info bazel-bin)/extract_verify/extracted_local_config.txt"
+EXTRACTED_PULLED="$(bazel info bazel-bin)/extract_verify/extracted_pulled_tool.sh"
+EXTRACTED_APP="$(bazel info bazel-bin)/extract_verify/extracted_app.conf"
+
+if ! grep -q "hello from local config" "${EXTRACTED_LOCAL}"; then
+  echo "ERROR: Phase 9 failed: extracted local config content mismatch: $(cat "${EXTRACTED_LOCAL}")" >&2
+  exit 1
+fi
+
+if ! grep -q "hello from pulled tool" "${EXTRACTED_PULLED}"; then
+  echo "ERROR: Phase 9 failed: extracted pulled tool content mismatch: $(cat "${EXTRACTED_PULLED}")" >&2
+  exit 1
+fi
+
+if ! grep -q "server_setting = enabled" "${EXTRACTED_APP}"; then
+  echo "ERROR: Phase 9 failed: extracted app config content mismatch: $(cat "${EXTRACTED_APP}")" >&2
+  exit 1
+fi
+
+echo "Phase 9 verified: successfully installed and extracted files from repository and pulled by Bazel with both dict and list syntax."
+
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="
