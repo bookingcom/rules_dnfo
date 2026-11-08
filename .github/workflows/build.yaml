@@ -42,7 +42,7 @@ jobs:
           bazel --bazelrc=.github/workflows/ci.bazelrc build -c opt "${BAZEL_ARGS[@]}" //cmd/dnfo:dist
           cp -L bazel-bin/cmd/dnfo/dnfo-*.tar.gz dist/
           ls -l dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dnfo
           path: dist/*.tar.gz
