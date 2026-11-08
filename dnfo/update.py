@@ -127,9 +127,6 @@ def register_in_module_bazel(module_path, buildozer_bin, repo_name, lock_label):
     if not added:
         log(f"Warning: Could not automatically add {repo_name} to use_repo via buildozer")
 
-    # 3. Format MODULE.bazel using buildozer
-    subprocess.run([buildozer_bin, "format", f"{module_path}:*"], env=os.environ)
-
 def main():
     workspace_root = os.environ.get("BUILD_WORKSPACE_DIRECTORY", os.getcwd())
     buildozer = find_buildozer()

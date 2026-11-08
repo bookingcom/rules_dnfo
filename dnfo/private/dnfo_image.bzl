@@ -270,10 +270,3 @@ def dnfo_image(
         ],
         visibility = visibility,
     )
-
-    if "load" not in native.existing_rules():
-        native.alias(
-            name = "load",
-            actual = ":" + name + "_load",
-            visibility = visibility,
-        )
