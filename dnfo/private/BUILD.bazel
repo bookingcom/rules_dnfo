@@ -1,12 +1,39 @@
 # gazelle:resolve starlark @dnf5-prebuilt//dnf5-prebuilt:defs.bzl @dnf5-prebuilt//dnf5-prebuilt:defs.bzl
 
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_test")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+py_binary(
+    name = "extract_base_bin",
+    srcs = ["extract_base.py"],
+    main = "extract_base.py",
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "extract_base_test",
+    srcs = [
+        "extract_base.py",
+        "extract_base_test.py",
+    ],
+    main = "extract_base_test.py",
+)
+
+bzl_library(
+    name = "extract_base",
+    srcs = ["extract_base.bzl"],
+    visibility = ["//dnfo:__subpackages__"],
+    deps = [
+        "@rules_img//img:providers",
+    ],
+)
 
 bzl_library(
     name = "dnfo_image",
     srcs = ["dnfo_image.bzl"],
     visibility = ["//dnfo:__subpackages__"],
     deps = [
+        ":extract_base",
         "@bazel_lib//lib:write_source_files",
         "@dnf5-prebuilt//dnf5-prebuilt:defs.bzl",
         "@rules_img//img:base_images",

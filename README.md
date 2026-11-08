@@ -172,6 +172,67 @@ bazel run //path/to:image.load
 
 ---
 
+## File Inheritance & Layering
+
+`rules_dnfo` supports two primary approaches for building on top of base layers: inheriting from another `dnfo.yaml` file (apko-style) or layering on top of an external container image pulled via `rules_img`.
+
+### Apko-Style File Inheritance (`include:`)
+
+You can inherit from a parent `dnfo` configuration using the `include:` directive (following [apko file format](https://github.com/chainguard-dev/apko/blob/main/docs/apko_file.md#includes)).
+
+When `include: <path>` is used, `gazelle-dnfo` automatically:
+1. Sets `base` to the parent container image target (e.g. `:parent` or `//pkg:parent`).
+2. References the parent's RPM database (`base_rpmdb = ":parent_rpmdb"`), allowing `dnf5` and `rpm_mark` to solve and record child packages on top of what is already installed in the parent.
+3. Forwards the parent's repository definitions (`base_repos = ":parent_repos"`), so the child automatically has access to the parent's package repositories without duplicating configuration.
+
+Example `child.dnfo.yaml`:
+
+```yaml
+include: parent.dnfo.yaml
+
+contents:
+  packages:
+    - curl
+    - jq
+```
+
+`include:` accepts relative file paths (`parent.dnfo.yaml`, `../base/base.dnfo.yaml`), absolute workspace labels (`//images/base:base.dnfo.yaml`), or target labels (`:parent`). Lists of included files are also supported.
+
+### Layering on Top of an External Base Image (`base:`)
+
+To build on top of an external container image (such as Red Hat UBI, Fedora, CentOS Stream, or Oracle Linux), pull the image in `MODULE.bazel` using `rules_img`, and reference it by name in your `dnfo.yaml`:
+
+1. **Pull the base image in `MODULE.bazel`**:
+   ```starlark
+   images = use_extension("@rules_img//img:extensions.bzl", "images")
+   images.pull(
+       name = "ubi9",
+       digest = "sha256:...",
+       repository = "registry.access.redhat.com/ubi9",
+   )
+   use_repo(images, "ubi9")
+   ```
+
+2. **Reference the pulled image in your `dnfo.yaml`**:
+   ```yaml
+   base: ubi9
+
+   contents:
+     packages:
+       - curl
+   ```
+
+3. **Automatic Extraction**:
+   When `base: <image_name>` is used, `rules_dnfo` invokes `dnfo_extract_base` to hermetically inspect the base image layers:
+   - Extracts `/var/lib/rpm/rpmdb.sqlite` from the base image layers and passes it to `rpm_lock` and `rpm_mark`.
+   - Extracts any `/etc/yum.repos.d/*.repo` files from the base image and configures them in `dnf_config`.
+   - Stacks the newly assembled RPM layer on top of `@<image_name>//:image` using `rules_img`.
+
+> [!NOTE]
+> External base images must be pulled via `rules_img` in `MODULE.bazel`. Direct registry URLs (e.g. `docker.io/library/alpine`) in `base:` are rejected with an actionable error directing you to use `images.pull`.
+
+---
+
 ## License
 
 Apache License 2.0.

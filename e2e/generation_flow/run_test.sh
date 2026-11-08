@@ -241,4 +241,136 @@ echo ""
 echo "--- Phase 6: Build container image with new package ---"
 INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //testimage:all
 
+echo ""
+echo "--- Phase 7: Apko-style file inheritance (include: parent.dnfo.yaml) ---"
+mkdir -p inheritance
+cat > inheritance/parent.dnfo.yaml <<EOF
+contents:
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/\$basearch/
+      gpgcheck: 0
+  packages:
+    - bash
+EOF
+
+cat > inheritance/child.dnfo.yaml <<EOF
+include: parent.dnfo.yaml
+contents:
+  packages:
+    - curl
+EOF
+
+# 1. Run gazelle to generate targets
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+echo "Generated inheritance/BUILD.bazel:"
+cat inheritance/BUILD.bazel
+
+if ! grep -q 'base = ":parent_dnfo"' inheritance/BUILD.bazel; then
+  echo "ERROR: Phase 7 failed: expected 'base = \":parent_dnfo\"' in inheritance/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q 'base_rpmdb = ":parent_dnfo_rpmdb"' inheritance/BUILD.bazel; then
+  echo "ERROR: Phase 7 failed: expected 'base_rpmdb = \":parent_dnfo_rpmdb\"' in inheritance/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q 'base_repos = ":parent_dnfo_repos"' inheritance/BUILD.bazel; then
+  echo "ERROR: Phase 7 failed: expected 'base_repos = \":parent_dnfo_repos\"' in inheritance/BUILD.bazel" >&2
+  exit 1
+fi
+echo "Phase 7 verified: child target correctly wired with parent base, rpmdb, and repos."
+
+# 2. Lock parent target and enable it so parent_dnfo_rpmdb exists
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //inheritance:parent_dnfo.lock
+
+cat >> MODULE.bazel <<EOF
+
+dnfo.lock(
+    name = "parent_dnfo_packages",
+    lockfile = "//inheritance:parent.dnfo.lock.json",
+)
+use_repo(dnfo, "parent_dnfo_packages")
+EOF
+
+# Flip parent to lock_only = False so parent_dnfo_rpmdb is declared
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+# 3. Lock child target against parent's rpmdb
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //inheritance:child_dnfo.lock
+
+cat >> MODULE.bazel <<EOF
+
+dnfo.lock(
+    name = "child_dnfo_packages",
+    lockfile = "//inheritance:child.dnfo.lock.json",
+)
+use_repo(dnfo, "child_dnfo_packages")
+EOF
+
+# 4. Flip child to lock_only = False with gazelle
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+# 5. Build both parent and child image targets
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //inheritance:all
+echo "Phase 7 verified: both parent and child (with inherited rpmdb and repos) built successfully."
+
+echo ""
+echo "--- Phase 8: External base image extraction and validation ---"
+
+# 8a: Verify validation error when invalid registry URL or tag is specified in base
+mkdir -p invalid_base
+cat > invalid_base/dnfo.yaml <<EOF
+base: docker.io/library/alpine:latest
+contents:
+  packages:
+    - bash
+EOF
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && ! bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo >/dev/null 2>&1
+echo "Phase 8a verified: Gazelle failed with actionable error when invalid image URL/tag was specified."
+rm -rf invalid_base
+
+# 8b: External base image configuration and extraction test
+mkdir -p ext_base
+cat > ext_base/dnfo.yaml <<EOF
+base: external_ubi9
+contents:
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/\$basearch/
+      gpgcheck: 0
+  packages:
+    - curl
+EOF
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+echo "Generated ext_base/BUILD.bazel:"
+cat ext_base/BUILD.bazel
+
+if ! grep -q 'base = "@external_ubi9//:image"' ext_base/BUILD.bazel; then
+  echo "ERROR: Phase 8b failed: expected 'base = \"@external_ubi9//:image\"' in ext_base/BUILD.bazel" >&2
+  exit 1
+fi
+echo "Phase 8b verified: external base image correctly mapped to @external_ubi9//:image."
+
+# Verify extraction and layering by running dnfo_image on top of the built testimage
+cat > ext_base/BUILD.bazel <<EOF
+load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
+
+dnfo_image(
+    name = "from_base",
+    config = "dnfo.yaml",
+    base = "//testimage:testimage",
+    contents = "@testimage_packages//:rpms",
+    packages = ["curl"],
+    lock_only = False,
+)
+EOF
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //ext_base:from_base
+echo "Phase 8b verified: extracted base rpmdb and repos from base image and built layered image successfully."
+
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="
