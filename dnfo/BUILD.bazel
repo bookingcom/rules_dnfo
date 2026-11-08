@@ -1,46 +1,12 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("//dnfo:toolchain.bzl", "current_dnfo_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 
-toolchain_type(
-    name = "toolchain_type",
-    visibility = ["//visibility:public"],
-)
-
-current_dnfo_toolchain(
-    name = "current_toolchain",
-)
-
 exports_files([
     "defs.bzl",
-    "extensions.bzl",
-    "toolchain.bzl",
 ])
 
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
-    deps = [
-        ":toolchain",
-        "//dnfo/private:dnfo_image",
-        "//dnfo/private:dnfo_lock",
-        "//dnfo/private:translate_lock",
-    ],
-)
-
-bzl_library(
-    name = "extensions",
-    srcs = ["extensions.bzl"],
-    deps = [
-        "//dnfo/private:platforms",
-        "//dnfo/private:repositories",
-        "//dnfo/private:translate_lock",
-        "//dnfo/private:versions",
-    ],
-)
-
-bzl_library(
-    name = "toolchain",
-    srcs = ["toolchain.bzl"],
 )

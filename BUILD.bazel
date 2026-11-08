@@ -1,15 +1,9 @@
 load("@aspect_gazelle_prebuilt//:def.bzl", "aspect_gazelle")
 
-# gazelle:prefix github.com/bookingcom/rules_dnfo
-
 exports_files(["LICENSE"])
 
 aspect_gazelle(
     name = "gazelle",
-    languages = [
-        "go",
-        "starlark",
-    ],
-    repo_config = "@bazel_gazelle_go_repository_config//:WORKSPACE",
+    languages = ["starlark"],
     with_check = True,
 )
