@@ -11,7 +11,7 @@ load(
     "passwd_entry",
 )
 load("@rules_img//img:image.bzl", "image_manifest")
-load("@rules_img//img:layer.bzl", "layer_from_tar")
+load("@rules_img//img:layer.bzl", "image_layer", "layer_from_tar")
 load("@rules_img//img:load.bzl", "image_load")
 load("@rules_containers_util//containers:defs.bzl", "image_extract")
 
@@ -85,6 +85,7 @@ def dnfo_image(
         base_repos = None,
         base_repo_file = None,
         include_skeleton = None,
+        files = {},
         **kwargs):
     """Builds an OCI container image from RPM packages declared in a dnfo YAML specification.
 
@@ -124,6 +125,10 @@ def dnfo_image(
       include_skeleton: Optional boolean to explicitly force or omit the linux_skeleton
           directory layer. When None (default), skeleton is automatically omitted if base
           is provided or if 'filesystem' is in packages.
+      files: Dictionary or list of files to install into the image from the repository
+          or pulled by Bazel. Can be a dict mapping destination paths to source labels
+          (e.g. {"/etc/app.conf": ":app.conf", "/usr/bin/tool": "@pulled//:tool"}),
+          or a list of dicts specifying path, source, and optional permissions/mode.
       **kwargs: Additional arguments forwarded to rules_img.
     """
     visibility = kwargs.get("visibility", ["//visibility:public"])
@@ -222,31 +227,35 @@ def dnfo_image(
     if lock_only:
         return
 
+    layers = []
+
     # 3. RPMDB and RPMs layer via dnf5-prebuilt
-    rpms_label = contents if contents else ("@" + name + "_packages//:rpms")
-    rpm_mark(
-        name = name + "_rpmdb",
-        base_rpmdb = base_rpmdb,
-        rpms = [rpms_label],
-        visibility = visibility,
-    )
+    if packages or contents:
+        rpms_label = contents if contents else ("@" + name + "_packages//:rpms")
+        rpm_mark(
+            name = name + "_rpmdb",
+            base_rpmdb = base_rpmdb,
+            rpms = [rpms_label],
+            visibility = visibility,
+        )
 
-    rpm_layer(
-        name = name + "_rpms_tar",
-        rpms = [rpms_label],
-        rpmdb = ":" + name + "_rpmdb",
-        gpgcheck = gpgcheck and bool(all_keyrings),
-        gpgkeys = all_keyrings,
-        visibility = ["//visibility:private"],
-    )
+        rpm_layer(
+            name = name + "_rpms_tar",
+            rpms = [rpms_label],
+            rpmdb = ":" + name + "_rpmdb",
+            gpgcheck = gpgcheck and bool(all_keyrings),
+            gpgkeys = all_keyrings,
+            visibility = ["//visibility:private"],
+        )
 
-    layer_from_tar(
-        name = name + "_rpms_layer",
-        src = ":" + name + "_rpms_tar",
-        visibility = ["//visibility:private"],
-    )
+        layer_from_tar(
+            name = name + "_rpms_layer",
+            src = ":" + name + "_rpms_tar",
+            visibility = ["//visibility:private"],
+        )
+        layers.append(":" + name + "_rpms_layer")
 
-    # 3. Base image layer with accounts (conditionally generated)
+    # 4. Base image layer with accounts (conditionally generated)
     has_filesystem = ("filesystem" in packages) if packages else False
     need_skeleton = include_skeleton if include_skeleton != None else (not bool(base) and not has_filesystem)
     need_accounts = bool(accounts) or (need_skeleton and not bool(base))
@@ -292,7 +301,6 @@ def dnfo_image(
         )
         base_layer_srcs.append(":" + name + "_passwd")
 
-    layers = [":" + name + "_rpms_layer"]
     if base_layer_srcs:
         base_image_layer(
             name = name + "_base_layer",
@@ -300,6 +308,62 @@ def dnfo_image(
             visibility = ["//visibility:private"],
         )
         layers.append(":" + name + "_base_layer")
+
+    # 5. Files layer (install files from repository or Bazel labels)
+    if files:
+        files_srcs = {}
+        files_metadata = {}
+
+        if type(files) == "dict":
+            for dest, item in files.items():
+                dest_path = dest if dest.startswith("/") else ("/" + dest)
+                if type(item) == "string":
+                    files_srcs[dest_path] = item
+                elif type(item) == "dict":
+                    src = item.get("source", item.get("src"))
+                    if not src:
+                        fail("File entry for '%s' in %s must specify 'source' or 'src'" % (dest, name))
+                    files_srcs[dest_path] = src
+                    meta = {}
+                    for k in ["mode", "uid", "gid", "uname", "gname", "mtime"]:
+                        if k in item:
+                            meta[k] = item[k]
+                    if "permissions" in item and "mode" not in meta:
+                        meta["mode"] = str(item["permissions"])
+                    if meta:
+                        files_metadata[dest_path] = json.encode(meta)
+                else:
+                    fail("Unexpected file entry type '%s' for '%s' in 'files' attribute for %s" % (type(item), dest, name))
+        elif type(files) == "list":
+            for item in files:
+                if type(item) == "dict":
+                    dest = item.get("path", item.get("destination", item.get("dest")))
+                    if not dest:
+                        fail("File item in %s 'files' must specify 'path' or 'destination'" % name)
+                    dest_path = dest if dest.startswith("/") else ("/" + dest)
+                    src = item.get("source", item.get("src"))
+                    if not src:
+                        fail("File item for '%s' in %s must specify 'source' or 'src'" % (dest, name))
+                    files_srcs[dest_path] = src
+                    meta = {}
+                    for k in ["mode", "uid", "gid", "uname", "gname", "mtime"]:
+                        if k in item:
+                            meta[k] = item[k]
+                    if "permissions" in item and "mode" not in meta:
+                        meta["mode"] = str(item["permissions"])
+                    if meta:
+                        files_metadata[dest_path] = json.encode(meta)
+                else:
+                    fail("Unexpected file entry type '%s' in 'files' attribute for %s" % (type(item), name))
+
+        if files_srcs:
+            image_layer(
+                name = name + "_files_layer",
+                srcs = files_srcs,
+                file_metadata = files_metadata,
+                visibility = ["//visibility:private"],
+            )
+            layers.append(":" + name + "_files_layer")
 
     # 4. Container image manifest
     ep = entrypoint if entrypoint != None else ["/bin/bash"]
