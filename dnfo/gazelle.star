@@ -83,6 +83,9 @@ def _declare(ctx):
             repos = contents.get("repositories")
             if repos and type(repos) == "list":
                 attrs["repositories"] = repos
+            kr = contents.get("keyring")
+            if kr and type(kr) == "list":
+                attrs["keyring"] = kr
 
         # Architectures
         archs = data.get("archs")

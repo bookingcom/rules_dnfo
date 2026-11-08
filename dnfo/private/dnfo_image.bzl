@@ -125,19 +125,35 @@ def dnfo_image(
     lockfile_name = config.rsplit(".", 1)[0] + ".lock.json" if "." in config else (config + ".lock.json")
     arch_list = [architecture, "noarch"] if architecture != "noarch" else ["noarch"]
 
-    if repositories and packages:
+    all_keyrings = list(keyring)
+    repo_configs = []
+    dict_repos = []
+    if type(repositories) == "list":
+        for r in repositories:
+            if type(r) == "string":
+                repo_configs.append(r)
+            elif type(r) == "dict":
+                dict_repos.append(r)
+                k = r.get("gpgkey")
+                if k and (k.startswith("@") or k.startswith("//") or k.startswith(":")):
+                    if k not in all_keyrings:
+                        all_keyrings.append(k)
+
+    if dict_repos:
         _dnfo_repo_configs(
             name = name + "_repos",
-            repositories_json = json.encode(repositories),
+            repositories_json = json.encode(dict_repos),
             visibility = ["//visibility:private"],
         )
+        repo_configs.append(":" + name + "_repos")
 
+    if repo_configs and packages:
         dnf_config(
             name = name + "_dnf_config",
             arch = arch_list,
             install_weak_deps = install_weak_deps,
             releasever = releasever,
-            repo_configs = [":" + name + "_repos"],
+            repo_configs = repo_configs,
             visibility = ["//visibility:private"],
         )
 
@@ -173,8 +189,8 @@ def dnfo_image(
         name = name + "_rpms_tar",
         rpms = [rpms_label],
         rpmdb = ":" + name + "_rpmdb",
-        gpgcheck = gpgcheck and bool(keyring),
-        gpgkeys = keyring,
+        gpgcheck = gpgcheck and bool(all_keyrings),
+        gpgkeys = all_keyrings,
         visibility = ["//visibility:private"],
     )
 
