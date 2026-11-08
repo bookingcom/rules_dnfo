@@ -14,13 +14,13 @@ bazel_dep(name = "buildifier_prebuilt", version = "10.1.0")
 bazel_dep(name = "aspect_rules_py", version = "2.0.0-alpha.10")
 
 python = use_extension("@aspect_rules_py//py:extensions.bzl", "python_interpreters")
-python.toolchain(python_version = "3.13")
+python.toolchain(python_version = "3.14")
 use_repo(
     python,
-    "python_3_13_aarch64_apple_darwin",
-    "python_3_13_aarch64_unknown_linux_gnu",
-    "python_3_13_x86_64_apple_darwin",
-    "python_3_13_x86_64_unknown_linux_gnu",
+    "python_3_14_aarch64_apple_darwin",
+    "python_3_14_aarch64_unknown_linux_gnu",
+    "python_3_14_x86_64_apple_darwin",
+    "python_3_14_x86_64_unknown_linux_gnu",
     "python_interpreters",
 )
 
