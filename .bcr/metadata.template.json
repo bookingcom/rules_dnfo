@@ -1,0 +1,16 @@
+{
+  "homepage": "https://github.com/bookingcom/rules_dnfo",
+  "maintainers": [
+    {
+      "name": "Manuel Francisco Naranjo",
+      "email": "naranjo.manuel@gmail.com",
+      "github": "manuelnaranjo",
+      "github_user_id": 545883
+    }
+  ],
+  "repository": [
+    "github:bookingcom/rules_dnfo"
+  ],
+  "versions": [],
+  "yanked_versions": {}
+}
