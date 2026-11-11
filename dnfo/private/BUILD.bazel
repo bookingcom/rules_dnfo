@@ -2,13 +2,28 @@
 # gazelle:resolve starlark @rules_containers_util//containers:defs.bzl @rules_containers_util//containers:defs.bzl
 # gazelle:resolve starlark @rules_multirun//:defs.bzl @rules_multirun//:defs.bzl
 
+load("@aspect_rules_py//py:defs.bzl", "py_binary")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+exports_files(
+    glob(["*.bzl"]),
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "p11_kit_extract_bin",
+    srcs = ["p11_kit_extract.py"],
+    main = "p11_kit_extract.py",
+    visibility = ["//visibility:public"],
+)
 
 bzl_library(
     name = "dnfo_image",
     srcs = ["dnfo_image.bzl"],
     visibility = ["//dnfo:__subpackages__"],
     deps = [
+        ":p11_kit_extract",
+        "@bazel_lib//lib:expand_template",
         "@bazel_lib//lib:write_source_files",
         "@dnf5-prebuilt//dnf5-prebuilt:defs.bzl",
         "@rules_containers_util//containers:defs",
@@ -18,4 +33,10 @@ bzl_library(
         "@rules_img//img:load",
         "@rules_multirun//:defs",
     ],
+)
+
+bzl_library(
+    name = "p11_kit_extract",
+    srcs = ["p11_kit_extract.bzl"],
+    visibility = ["//dnfo:__subpackages__"],
 )
