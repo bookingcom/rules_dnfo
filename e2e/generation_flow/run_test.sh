@@ -36,12 +36,12 @@ local_path_override(
     path = "${REPO_ROOT}",
 )
 
-bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.5")
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.7")
 archive_override(
     module_name = "dnf5-prebuilt",
-    integrity = "sha256-Plm67w2RlJ/trfQaAczblLpMa6zFjcMO3xDW5cHpp4Q=",
-    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.5",
-    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.5/dnf5-prebuilt-v5.4.6.0.bcr.5.tar.gz"],
+    integrity = "sha256-VsPvx5ZNZIyB6u2qJ06lfcL3OBCpGQjZCEzEZLR6qfQ=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.7",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.7/dnf5-prebuilt-v5.4.6.0.bcr.7.tar.gz"],
 )
 
 bazel_dep(name = "rules_containers_util", version = "0.0.5")
@@ -510,5 +510,99 @@ if ! grep -q "server_setting = enabled" "${EXTRACTED_APP}"; then
 fi
 
 echo "Phase 9 verified: successfully installed and extracted files from repository and pulled by Bazel with both dict and list syntax."
+
+echo ""
+echo "--- Phase 10: Path exclusions and locale setting in dnfo.yaml ---"
+
+mkdir -p test_opts
+cat > test_opts/dnfo.yaml <<EOF
+locale: en_US.UTF-8
+exclude_paths:
+  - /etc/skel
+exclude_patterns:
+  - "*/share/zoneinfo/*"
+exclude_licenses: false
+contents:
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/\$basearch/
+      gpgcheck: 0
+  packages:
+    - bash
+EOF
+
+# 1. Run gazelle to generate targets
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+echo "Generated test_opts/BUILD.bazel:"
+cat test_opts/BUILD.bazel
+
+if ! grep -q 'locale = "en_US.UTF-8"' test_opts/BUILD.bazel; then
+  echo "ERROR: Phase 10 failed: expected 'locale = \"en_US.UTF-8\"' in test_opts/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q 'exclude_licenses = False' test_opts/BUILD.bazel; then
+  echo "ERROR: Phase 10 failed: expected 'exclude_licenses = False' in test_opts/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q '/etc/skel' test_opts/BUILD.bazel; then
+  echo "ERROR: Phase 10 failed: expected '/etc/skel' in test_opts/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q '\*/share/zoneinfo/\*' test_opts/BUILD.bazel; then
+  echo "ERROR: Phase 10 failed: expected '*/share/zoneinfo/*' in test_opts/BUILD.bazel" >&2
+  exit 1
+fi
+echo "Phase 10 verified: Gazelle correctly generated locale, exclude_patterns, and exclude_licenses."
+
+# 2. Generate lockfile
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_opts:test_opts.lock
+
+cat >> MODULE.bazel <<EOF
+
+dnfo.lock(
+    name = "test_opts_packages",
+    lockfile = "//test_opts:dnfo.lock.json",
+)
+use_repo(dnfo, "test_opts_packages")
+EOF
+
+# 3. Flip lock_only = False with gazelle
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+# 4. Build image and layer tar
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_opts:all //test_opts:test_opts_rpms_tar
+
+echo "Final test_opts/BUILD.bazel:"
+cat test_opts/BUILD.bazel
+
+RPMS_TAR="$(bazel info bazel-bin)/test_opts/test_opts_rpms_tar.tar"
+
+# Verify excluded paths are absent from the layer tar
+if [ "$(tar -tf "${RPMS_TAR}" | grep -c "^etc/skel")" -gt 0 ]; then
+  echo "ERROR: Phase 10 failed: etc/skel was found in test_opts_rpms_tar.tar despite exclusion!" >&2
+  exit 1
+fi
+if [ "$(tar -tf "${RPMS_TAR}" | grep -c "zoneinfo")" -gt 0 ]; then
+  echo "ERROR: Phase 10 failed: zoneinfo was found in test_opts_rpms_tar.tar despite exclusion!" >&2
+  exit 1
+fi
+
+# Verify non-matching locales were filtered by install_langs
+for loc in de fr es it; do
+  if [ "$(tar -tf "${RPMS_TAR}" | grep -c "^usr/share/locale/${loc}/")" -gt 0 ]; then
+    echo "ERROR: Phase 10 failed: locale ${loc} was not filtered out by install_langs in test_opts_rpms_tar.tar!" >&2
+    exit 1
+  fi
+done
+
+# Verify licenses are preserved because exclude_licenses = false
+if [ "$(tar -tf "${RPMS_TAR}" | grep -c "^usr/share/licenses")" -eq 0 ]; then
+  echo "ERROR: Phase 10 failed: licenses were excluded despite exclude_licenses = false!" >&2
+  exit 1
+fi
+
+echo "Phase 10 verified: path exclusions, locale filtering, and license retention validated in output layer."
 
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="

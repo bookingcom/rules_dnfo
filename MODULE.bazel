@@ -27,12 +27,12 @@ use_repo(
 register_toolchains("@python_interpreters//:all")
 
 # dnf5-prebuilt is not yet available in the Bazel Central Registry (BCR)
-bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.5")
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.7")
 archive_override(
     module_name = "dnf5-prebuilt",
-    integrity = "sha256-Plm67w2RlJ/trfQaAczblLpMa6zFjcMO3xDW5cHpp4Q=",
-    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.5",
-    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.5/dnf5-prebuilt-v5.4.6.0.bcr.5.tar.gz"],
+    integrity = "sha256-VsPvx5ZNZIyB6u2qJ06lfcL3OBCpGQjZCEzEZLR6qfQ=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.7",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.7/dnf5-prebuilt-v5.4.6.0.bcr.7.tar.gz"],
 )
 
 # rules_containers_util is not yet available in the Bazel Central Registry (BCR)

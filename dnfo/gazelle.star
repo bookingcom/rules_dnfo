@@ -6,6 +6,7 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "lock_only",
         "packages",
         "repositories",
+        "keyring",
         "entrypoint",
         "cmd",
         "workdir",
@@ -19,6 +20,14 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "base_repo_file",
         "include_skeleton",
         "files",
+        "exclude_patterns",
+        "exclude_paths",
+        "exclude_docs",
+        "exclude_man",
+        "exclude_licenses",
+        "exclude_build_id",
+        "install_langs",
+        "locale",
     ],
 })
 
@@ -266,6 +275,45 @@ def _declare(ctx):
         inc_skel = data.get("include_skeleton", data.get("include-skeleton"))
         if inc_skel != None and type(inc_skel) == "bool":
             attrs["include_skeleton"] = inc_skel
+
+        # Exclude patterns and paths
+        raw_excludes = []
+        for k in ["exclude_patterns", "exclude-patterns", "exclude_paths", "exclude-paths", "exclude", "excludes"]:
+            v = data.get(k)
+            if not v and contents and type(contents) == "dict":
+                v = contents.get(k)
+            if v:
+                if type(v) == "list":
+                    for item in v:
+                        if item not in raw_excludes:
+                            raw_excludes.append(item)
+                elif type(v) == "string":
+                    if v not in raw_excludes:
+                        raw_excludes.append(v)
+
+        if raw_excludes:
+            attrs["exclude_patterns"] = raw_excludes
+
+        # Exclude boolean flags
+        for flag in ["exclude_docs", "exclude_man", "exclude_licenses", "exclude_build_id"]:
+            k_kebab = flag.replace("_", "-")
+            val = data.get(flag, data.get(k_kebab))
+            if val == None and contents and type(contents) == "dict":
+                val = contents.get(flag, contents.get(k_kebab))
+            if val != None and type(val) == "bool":
+                attrs[flag] = val
+
+        # Locale and language configuration
+        loc = data.get("locale", data.get("locales"))
+        if not loc:
+            loc = data.get("install_langs", data.get("install-langs"))
+        if not loc and contents and type(contents) == "dict":
+            loc = contents.get("locale", contents.get("locales"))
+            if not loc:
+                loc = contents.get("install_langs", contents.get("install-langs"))
+
+        if loc:
+            attrs["locale"] = loc
 
         # Files installation support
         files_data = data.get("files", data.get("install"))

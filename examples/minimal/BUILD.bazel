@@ -26,6 +26,7 @@ dnfo_image(
         "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
         "TERM": "xterm",
     },
+    keyring = ["https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10"],
     lock_only = False,
     packages = [
         "bash",

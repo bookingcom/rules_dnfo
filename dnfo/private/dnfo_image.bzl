@@ -61,6 +61,32 @@ _dnfo_repo_configs = rule(
     doc = "Renders .repo configuration files from declarative repository dicts.",
 )
 
+def _normalize_exclude_pattern(pattern):
+    pats = [pattern]
+    if pattern.startswith("/"):
+        stripped = pattern.lstrip("/")
+        if stripped not in pats:
+            pats.append(stripped)
+        if not pattern.startswith("*/"):
+            wildcard_prefix = "*" + pattern
+            if wildcard_prefix not in pats:
+                pats.append(wildcard_prefix)
+    elif not pattern.startswith("*"):
+        wildcard_prefix = "*/" + pattern
+        if wildcard_prefix not in pats:
+            pats.append(wildcard_prefix)
+
+    res = list(pats)
+    for p in pats:
+        if "*" not in p and "?" not in p:
+            entry_wildcard = p.rstrip("/") + "/*"
+            if entry_wildcard not in res:
+                res.append(entry_wildcard)
+            dir_wildcard = p.rstrip("/")
+            if dir_wildcard not in res:
+                res.append(dir_wildcard)
+    return res
+
 def dnfo_image(
         name,
         config = "dnfo.yaml",
@@ -86,6 +112,14 @@ def dnfo_image(
         base_repo_file = None,
         include_skeleton = None,
         files = {},
+        exclude_patterns = [],
+        exclude_paths = [],
+        exclude_docs = None,
+        exclude_man = None,
+        exclude_licenses = None,
+        exclude_build_id = None,
+        install_langs = None,
+        locale = None,
         **kwargs):
     """Builds an OCI container image from RPM packages declared in a dnfo YAML specification.
 
@@ -129,9 +163,49 @@ def dnfo_image(
           or pulled by Bazel. Can be a dict mapping destination paths to source labels
           (e.g. {"/etc/app.conf": ":app.conf", "/usr/bin/tool": "@pulled//:tool"}),
           or a list of dicts specifying path, source, and optional permissions/mode.
+      exclude_patterns: Optional list of glob patterns to exclude from RPM layers during bsdtar extraction.
+      exclude_paths: Optional list of directory or file paths to exclude from RPM layers.
+      exclude_docs: Optional boolean flag to exclude documentation and info files (default True in rpm_layer).
+      exclude_man: Optional boolean flag to exclude manual pages (default True in rpm_layer).
+      exclude_licenses: Optional boolean flag to exclude license files (default True in rpm_layer).
+      exclude_build_id: Optional boolean flag to exclude .build-id debug links (default True in rpm_layer).
+      install_langs: Optional language locales to keep (e.g. 'en_US.UTF-8' or ['en_US.UTF-8']),
+          passed to dnf_config and rpm_layer to filter non-matching locale files.
+      locale: Optional locale alias for install_langs (e.g. 'en_US.UTF-8'); also sets the default
+          'LANG' environment variable in the container image manifest if not already configured in env.
       **kwargs: Additional arguments forwarded to rules_img.
     """
     visibility = kwargs.get("visibility", ["//visibility:public"])
+
+    # Resolve install_langs and locale
+    install_langs_val = install_langs if install_langs != None else locale
+    install_langs_str = ""
+    primary_locale = None
+    if install_langs_val:
+        if type(install_langs_val) == "list":
+            install_langs_str = ":".join(install_langs_val)
+            primary_locale = install_langs_val[0] if install_langs_val else None
+        else:
+            install_langs_str = str(install_langs_val)
+            primary_locale = install_langs_str.replace(",", ":").split(":")[0]
+
+    # Resolve exclude patterns and paths
+    raw_patterns = []
+    if type(exclude_patterns) == "list":
+        raw_patterns.extend(exclude_patterns)
+    elif type(exclude_patterns) == "string":
+        raw_patterns.append(exclude_patterns)
+
+    if type(exclude_paths) == "list":
+        raw_patterns.extend(exclude_paths)
+    elif type(exclude_paths) == "string":
+        raw_patterns.append(exclude_paths)
+
+    all_exclude_patterns = []
+    for pat in raw_patterns:
+        for norm_pat in _normalize_exclude_pattern(pat):
+            if norm_pat not in all_exclude_patterns:
+                all_exclude_patterns.append(norm_pat)
 
     # 1. Base image extraction (using rules_containers_util image_extract for base images)
     extracted_repos = None
@@ -197,6 +271,10 @@ def dnfo_image(
         repo_configs.append(extracted_repos)
 
     if repo_configs and packages:
+        dnf_config_kwargs = {}
+        if install_langs_str:
+            dnf_config_kwargs["install_langs"] = install_langs_str
+
         dnf_config(
             name = name + "_dnf_config",
             arch = arch_list,
@@ -204,6 +282,7 @@ def dnfo_image(
             releasever = releasever,
             repo_configs = repo_configs,
             visibility = ["//visibility:private"],
+            **dnf_config_kwargs
         )
 
         rpm_lock(
@@ -239,13 +318,34 @@ def dnfo_image(
             visibility = visibility,
         )
 
+        rpm_layer_kwargs = {}
+        if all_exclude_patterns:
+            rpm_layer_kwargs["exclude_patterns"] = all_exclude_patterns
+        if install_langs_str:
+            rpm_layer_kwargs["install_langs"] = install_langs_str
+        if exclude_docs != None:
+            rpm_layer_kwargs["exclude_docs"] = exclude_docs
+        if exclude_man != None:
+            rpm_layer_kwargs["exclude_man"] = exclude_man
+        if exclude_licenses != None:
+            rpm_layer_kwargs["exclude_licenses"] = exclude_licenses
+        if exclude_build_id != None:
+            rpm_layer_kwargs["exclude_build_id"] = exclude_build_id
+
+        valid_keyrings = [
+            k
+            for k in all_keyrings
+            if k.startswith("@") or k.startswith("//") or k.startswith(":")
+        ]
+
         rpm_layer(
             name = name + "_rpms_tar",
             rpms = [rpms_label],
             rpmdb = ":" + name + "_rpmdb",
-            gpgcheck = gpgcheck and bool(all_keyrings),
-            gpgkeys = all_keyrings,
+            gpgcheck = gpgcheck and bool(valid_keyrings),
+            gpgkeys = valid_keyrings,
             visibility = ["//visibility:private"],
+            **rpm_layer_kwargs
         )
 
         layer_from_tar(
@@ -370,6 +470,10 @@ def dnfo_image(
     c = cmd if cmd != None else ["-l"]
     wd = workdir if workdir != None else "/home"
 
+    merged_env = dict(env) if env else {}
+    if primary_locale and "LANG" not in merged_env:
+        merged_env["LANG"] = primary_locale
+
     manifest_kwargs = {}
     if base:
         manifest_kwargs["base"] = base
@@ -380,7 +484,7 @@ def dnfo_image(
         entrypoint = ep,
         cmd = c,
         working_dir = wd,
-        env = env,
+        env = merged_env,
         visibility = visibility,
         **manifest_kwargs
     )
