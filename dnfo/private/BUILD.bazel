@@ -2,8 +2,9 @@
 # gazelle:resolve starlark @rules_containers_util//containers:defs.bzl @rules_containers_util//containers:defs.bzl
 # gazelle:resolve starlark @rules_multirun//:defs.bzl @rules_multirun//:defs.bzl
 
-load("@aspect_rules_py//py:defs.bzl", "py_binary")
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_test")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@dnf5-prebuilt//dnf5-prebuilt:defs.bzl", "rpm_extract")
 
 exports_files(
     glob(["*.bzl"]),
@@ -33,6 +34,19 @@ bzl_library(
         "@rules_img//img:load",
         "@rules_multirun//:defs",
     ],
+)
+
+rpm_extract(
+    name = "test_ca_certificates_pki",
+    dirs = ["usr/share/pki/ca-trust-source"],
+    rpms = ["@certificates_x86_64_packages//:ca-certificates"],
+)
+
+py_test(
+    name = "p11_kit_extract_test",
+    srcs = ["p11_kit_extract_test.py"],
+    data = [":test_ca_certificates_pki"],
+    deps = [":p11_kit_extract_bin"],
 )
 
 bzl_library(

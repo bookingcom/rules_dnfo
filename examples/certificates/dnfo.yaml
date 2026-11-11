@@ -1,0 +1,57 @@
+contents:
+  keyring:
+    - https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/$basearch/
+      gpgcheck: 1
+      gpgkey: https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10
+  packages:
+    - bash
+    - ca-certificates
+
+certificates:
+  providers:
+    - ca-certificates
+  additional:
+    - source: corp-root.crt
+      anchor: true
+    - content: |
+        -----BEGIN CERTIFICATE-----
+        MIIDIzCCAgugAwIBAgIUZsh9LFaNPYNR1ui43U8gIihkr7UwDQYJKoZIhvcNAQEL
+        BQAwITEfMB0GA1UEAwwWRXhhbXBsZSBJbmxpbmUgUm9vdCBDQTAeFw0yNjExMTEx
+        OTQ1NTlaFw0zNjExMDgxOTQ1NTlaMCExHzAdBgNVBAMMFkV4YW1wbGUgSW5saW5l
+        IFJvb3QgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC3VbXhJ75g
+        P1Op3BoY4QzSpR6IzWUBdJWK0i3GnMioFosi/s2xO2SEUee8Gg61WQYfJJ9aSEy3
+        OFJ4qjAxeRSwdM5qSAAgmrg+WHyqA4tR3zvs204fC1hRsQac+Am3qLI4w8vfy7ZK
+        L6Ar6+eIq26SX/2NjtzBrnNjyOjbRYYEao2/biORPevWpXvYhdMok19vQREW/imZ
+        232ueD4assi+vujpuNH7S0Y041k/7Wyesm1z52vZedOezf3lcV+kES3uU3j+Bi5x
+        egUmU6gyeefgwaA9ckOgI2zqKByhGsBMcBuii+X2E97WJDgDwVrE8xAQW7dHBepF
+        Y22FTmTrCDLXAgMBAAGjUzBRMB0GA1UdDgQWBBRWGkSxPFRgm5kXmQJXeeF/5t8H
+        LDAfBgNVHSMEGDAWgBRWGkSxPFRgm5kXmQJXeeF/5t8HLDAPBgNVHRMBAf8EBTAD
+        AQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBTXyVtxEIEXU7KrmWW+2CCxDc9YpAe8PGu
+        bx2NjrL3vzOfxQq0F6zsH9tPRVxpDquQUs/MyvGBywRE8nUMzC4J/2ql0Rza3vRG
+        FOdUkhkLubhs4dva4cvxQ5b5UXvp+nyt5t6lDOmkfOZwWc3gf0UYFmjZhZy+l9Fo
+        o/aZDiySRtzlypV7Lop+Nq75ApvWTMSjk6gg8+h5lZvdy01VUeIzfiC9AO7WyT9q
+        y3yY3B6cicUbnmC/Xi3gYyHcyF6dNuilEmRTzAss4scoIMBI+q4q1awqE4ehBX99
+        /0R+Owlyc0eXjReW8xBXAPoDjAMSS72Aq4XNS+Cg11MghDsGpB4c
+        -----END CERTIFICATE-----
+      name: inline-root.crt
+      anchor: true
+  purpose: server-auth
+  bundle: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+  directory: /etc/pki/ca-trust/extracted/pem/directory-hash
+  java-keystore: true
+  mode: "0444"
+
+entrypoint:
+  command: /bin/bash
+
+cmd: "-l"
+
+work-dir: /home
+
+archs:
+  - x86_64
+  - aarch64
