@@ -1,0 +1,59 @@
+load("@aspect_rules_py//py:defs.bzl", "py_test")
+load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
+
+# examples/certificates/BUILD.bazel
+
+dnfo_image(
+    name = "certificates",
+    archs = [
+        "x86_64",
+        "aarch64",
+    ],
+    certificates = {
+        "additional": [
+            {
+                "anchor": True,
+                "source": ":corp-root.crt",
+            },
+            {
+                "anchor": True,
+                "content": "-----BEGIN CERTIFICATE-----\nMIIDIzCCAgugAwIBAgIUZsh9LFaNPYNR1ui43U8gIihkr7UwDQYJKoZIhvcNAQEL\nBQAwITEfMB0GA1UEAwwWRXhhbXBsZSBJbmxpbmUgUm9vdCBDQTAeFw0yNjExMTEx\nOTQ1NTlaFw0zNjExMDgxOTQ1NTlaMCExHzAdBgNVBAMMFkV4YW1wbGUgSW5saW5l\nIFJvb3QgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC3VbXhJ75g\nP1Op3BoY4QzSpR6IzWUBdJWK0i3GnMioFosi/s2xO2SEUee8Gg61WQYfJJ9aSEy3\nOFJ4qjAxeRSwdM5qSAAgmrg+WHyqA4tR3zvs204fC1hRsQac+Am3qLI4w8vfy7ZK\nL6Ar6+eIq26SX/2NjtzBrnNjyOjbRYYEao2/biORPevWpXvYhdMok19vQREW/imZ\n232ueD4assi+vujpuNH7S0Y041k/7Wyesm1z52vZedOezf3lcV+kES3uU3j+Bi5x\negUmU6gyeefgwaA9ckOgI2zqKByhGsBMcBuii+X2E97WJDgDwVrE8xAQW7dHBepF\nY22FTmTrCDLXAgMBAAGjUzBRMB0GA1UdDgQWBBRWGkSxPFRgm5kXmQJXeeF/5t8H\nLDAfBgNVHSMEGDAWgBRWGkSxPFRgm5kXmQJXeeF/5t8HLDAPBgNVHRMBAf8EBTAD\nAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBTXyVtxEIEXU7KrmWW+2CCxDc9YpAe8PGu\nbx2NjrL3vzOfxQq0F6zsH9tPRVxpDquQUs/MyvGBywRE8nUMzC4J/2ql0Rza3vRG\nFOdUkhkLubhs4dva4cvxQ5b5UXvp+nyt5t6lDOmkfOZwWc3gf0UYFmjZhZy+l9Fo\no/aZDiySRtzlypV7Lop+Nq75ApvWTMSjk6gg8+h5lZvdy01VUeIzfiC9AO7WyT9q\ny3yY3B6cicUbnmC/Xi3gYyHcyF6dNuilEmRTzAss4scoIMBI+q4q1awqE4ehBX99\n/0R+Owlyc0eXjReW8xBXAPoDjAMSS72Aq4XNS+Cg11MghDsGpB4c\n-----END CERTIFICATE-----\n",
+                "name": "inline-root.crt",
+            },
+        ],
+        "bundle": "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+        "directory": "/etc/pki/ca-trust/extracted/pem/directory-hash",
+        "java-keystore": True,
+        "mode": "0444",
+        "providers": [
+            "ca-certificates",
+        ],
+        "purpose": "server-auth",
+    },
+    cmd = ["-l"],
+    config = "dnfo.yaml",
+    entrypoint = ["/bin/bash"],
+    keyring = ["https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10"],
+    lock_only = False,
+    packages = [
+        "bash",
+        "ca-certificates",
+    ],
+    repositories = [{
+        "baseurl": "https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/$basearch/",
+        "gpgcheck": 1,
+        "gpgkey": "https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10",
+        "id": "baseos",
+        "name": "BaseOS",
+    }],
+    workdir = "/home",
+)
+
+py_test(
+    name = "certificates_image_test",
+    srcs = ["certificates_image_test.py"],
+    data = [
+        ":certificates_base_layer",
+        ":certificates_files_layer",
+    ],
+)

@@ -58,8 +58,18 @@ dnfo_test.lock(
     name = "minimal_aarch64_packages",
     lockfile = "//examples/minimal:dnfo.aarch64.lock.json",
 )
+dnfo_test.lock(
+    name = "certificates_x86_64_packages",
+    lockfile = "//examples/certificates:dnfo.x86_64.lock.json",
+)
+dnfo_test.lock(
+    name = "certificates_aarch64_packages",
+    lockfile = "//examples/certificates:dnfo.aarch64.lock.json",
+)
 use_repo(
     dnfo_test,
+    "certificates_aarch64_packages",
+    "certificates_x86_64_packages",
     "minimal_aarch64_packages",
     "minimal_x86_64_packages",
 )
