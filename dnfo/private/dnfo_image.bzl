@@ -45,7 +45,10 @@ def _platform_for_arch(arch):
         return ("@rules_dnfo//dnfo/platforms:linux_s390x", "linux/s390x")
     if arch == "riscv64":
         return ("@rules_dnfo//dnfo/platforms:linux_riscv64", "linux/riscv64")
-    return (None, None)
+    fail("Unsupported architecture '%s'. Supported architectures are: %s" % (
+        arch,
+        ", ".join(["x86_64", "aarch64", "armv7hl", "ppc64le", "s390x", "riscv64"]),
+    ))
 
 def _dnfo_repo_configs_impl(ctx):
     repositories = json.decode(ctx.attr.repositories_json)
@@ -684,7 +687,9 @@ def dnfo_image(
 
     layers = []
     if packages or contents:
-        rpms_label = contents if contents else ("@" + name + "_packages//:rpms")
+        rpms_label = contents.get(arch) if type(contents) == "dict" else contents
+        if not rpms_label:
+            rpms_label = "@" + name + "_packages//:rpms"
         rpm_mark(
             name = name + "_rpmdb",
             base_rpmdb = base_rpmdb,
@@ -715,6 +720,8 @@ def dnfo_image(
         layers.append(files_layer_label)
 
     manifest_kwargs = {}
+    if target_platform:
+        manifest_kwargs["platform"] = target_platform
     if base:
         manifest_kwargs["base"] = base
     if user != None:

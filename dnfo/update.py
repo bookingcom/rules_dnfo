@@ -15,6 +15,31 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
+KNOWN_ARCHS = {
+    "x86_64", "x86-64", "amd64",
+    "aarch64", "arm64", "arm64v8",
+    "armv7hl", "armv7", "armv7l", "armhfp",
+    "ppc64le", "powerpc64le",
+    "s390x",
+    "riscv64",
+}
+
+def normalize_arch(arch: str) -> str:
+    a = arch.lower().strip()
+    if a in ("x86_64", "x86-64", "amd64"):
+        return "x86_64"
+    if a in ("aarch64", "arm64", "arm64v8"):
+        return "aarch64"
+    if a in ("armv7", "armv7l", "armv7hl", "armhfp"):
+        return "armv7hl"
+    if a in ("ppc64le", "powerpc64le"):
+        return "ppc64le"
+    if a in ("s390x",):
+        return "s390x"
+    if a in ("riscv64",):
+        return "riscv64"
+    return a
+
 def log(msg):
     print(f"[dnfo:update] {msg}")
 
@@ -86,8 +111,8 @@ def discover_lock_targets(workspace_root):
 
         fname = os.path.basename(lock_label)
         parts = fname.split(".")
-        if len(parts) >= 4 and parts[-2] == "lock" and parts[-1] == "json":
-            arch = parts[-3]
+        if len(parts) >= 4 and parts[-2] == "lock" and parts[-1] == "json" and parts[-3].lower() in KNOWN_ARCHS:
+            arch = normalize_arch(parts[-3])
             repo_name = f"{target_name}_{arch}_packages"
         else:
             repo_name = f"{target_name}_packages"

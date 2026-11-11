@@ -705,12 +705,85 @@ if ! grep -q '"architecture":"amd64"' "${INDEX_JSON}" || ! grep -q '"architectur
   exit 1
 fi
 
-CONFIG_JSON="$(find "$(bazel info output_path)" -name "test_multiarch_x86_64_config.json" | head -n 1)"
-if ! grep -q '"User":"nonroot"' "${CONFIG_JSON}"; then
-  echo "ERROR: Phase 11 failed: manifest config does not contain 'User':'nonroot'!" >&2
+X86_CONFIG="$(find "$(bazel info output_path)" -name "test_multiarch_x86_64_config.json" | head -n 1)"
+ARM_CONFIG="$(find "$(bazel info output_path)" -name "test_multiarch_aarch64_config.json" | head -n 1)"
+
+if ! grep -q '"architecture":"amd64"' "${X86_CONFIG}" || ! grep -q '"os":"linux"' "${X86_CONFIG}"; then
+  echo "ERROR: Phase 11 failed: multi-arch x86_64 manifest config missing architecture amd64 or os linux!" >&2
+  exit 1
+fi
+if ! grep -q '"architecture":"arm64"' "${ARM_CONFIG}" || ! grep -q '"os":"linux"' "${ARM_CONFIG}"; then
+  echo "ERROR: Phase 11 failed: multi-arch aarch64 manifest config missing architecture arm64 or os linux!" >&2
+  exit 1
+fi
+if ! grep -q '"User":"nonroot"' "${X86_CONFIG}" || ! grep -q '"User":"nonroot"' "${ARM_CONFIG}"; then
+  echo "ERROR: Phase 11 failed: manifest configs do not contain 'User':'nonroot'!" >&2
   exit 1
 fi
 
-echo "Phase 11 verified: multi-arch image index, rules_multirun companion target, and manifest user execution verified successfully."
+# 6. Single-arch non-x86 image (archs: [aarch64])
+mkdir -p test_single_aarch64
+cat > test_single_aarch64/dnfo.yaml <<EOF
+user: "1000:1000"
+archs:
+  - aarch64
+contents:
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/\$basearch/
+      gpgcheck: 0
+  packages:
+    - bash
+EOF
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_single_aarch64:test_single_aarch64.lock
+
+if [[ ! -f test_single_aarch64/dnfo.lock.json ]]; then
+  echo "ERROR: Phase 11 failed: test_single_aarch64/dnfo.lock.json was not generated!" >&2
+  exit 1
+fi
+
+cat >> MODULE.bazel <<EOF
+
+dnfo.lock(
+    name = "test_single_aarch64_packages",
+    lockfile = "//test_single_aarch64:dnfo.lock.json",
+)
+use_repo(
+    dnfo,
+    "test_single_aarch64_packages",
+)
+EOF
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_single_aarch64:test_single_aarch64
+
+SINGLE_ARM_CONFIG="$(find "$(bazel info output_path)" -name "test_single_aarch64_config.json" | head -n 1)"
+if ! grep -q '"architecture":"arm64"' "${SINGLE_ARM_CONFIG}" || ! grep -q '"os":"linux"' "${SINGLE_ARM_CONFIG}"; then
+  echo "ERROR: Phase 11 failed: single-arch aarch64 manifest does not declare architecture arm64 and os linux!" >&2
+  exit 1
+fi
+if ! grep -q '"User":"1000:1000"' "${SINGLE_ARM_CONFIG}"; then
+  echo "ERROR: Phase 11 failed: single-arch manifest config does not contain 'User':'1000:1000'!" >&2
+  exit 1
+fi
+
+# 7. Test dnfo_lock_hint property suppression
+OUTPUT=$(INVOCATION_ID=$(uuidgen) && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo 2>&1)
+if ! echo "$OUTPUT" | grep -q "\[gazelle-dnfo\] Multi-arch lockfiles found"; then
+  echo "ERROR: Phase 11 failed: expected lock hints when dnfo_lock_hint is default True" >&2
+  exit 1
+fi
+
+echo "# gazelle:dnfo_lock_hint false" | cat - test_multiarch/BUILD.bazel > test_multiarch/BUILD.bazel.tmp && mv test_multiarch/BUILD.bazel.tmp test_multiarch/BUILD.bazel
+OUTPUT_SUPPRESSED=$(INVOCATION_ID=$(uuidgen) && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo 2>&1)
+if echo "$OUTPUT_SUPPRESSED" | grep -q "\[gazelle-dnfo\] Multi-arch lockfiles found for //test_multiarch:test_multiarch"; then
+  echo "ERROR: Phase 11 failed: lock hint was not suppressed when dnfo_lock_hint is false" >&2
+  exit 1
+fi
+
+echo "Phase 11 verified: multi-arch image index, single-arch aarch64 manifest platform, lock hint suppression, rules_multirun companion target, and manifest user execution verified successfully."
 
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="

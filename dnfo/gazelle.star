@@ -480,31 +480,28 @@ def _declare(ctx):
                     lock_lines.append(
                         'dnfo.lock(\n    name = "%s",\n    lockfile = "%s:%s",\n)' % (rname, pkg_prefix, lf)
                     )
-                print(
-                    ("\n[gazelle-dnfo] Multi-arch lockfiles found for %s:%s.\n" % (pkg_prefix, name)) +
-                    "Ensure the following is present in your MODULE.bazel:\n\n" +
-                    'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
-                    "\n".join(lock_lines) + "\n" +
-                    ("use_repo(dnfo, %s)\n" % ", ".join(repo_names))
-                )
+                if ctx.properties["dnfo_lock_hint"]:
+                    print(
+                        ("\n[gazelle-dnfo] Multi-arch lockfiles found for %s:%s.\n" % (pkg_prefix, name)) +
+                        "Ensure the following is present in your MODULE.bazel:\n\n" +
+                        'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
+                        "\n".join(lock_lines) + "\n" +
+                        ("use_repo(dnfo, %s)\n" % ", ".join(repo_names))
+                    )
             else:
-                arch_for_lock = norm_archs[0] if norm_archs else None
-                if arch_for_lock and ctx.has_file(_lockfile_for(config_name, arch_for_lock)):
-                    lf = _lockfile_for(config_name, arch_for_lock)
-                    repo_name = "%s_%s_packages" % (name, arch_for_lock)
-                else:
-                    lf = _lockfile_for(config_name)
-                    repo_name = name + "_packages"
-                print(
-                    "\n[gazelle-dnfo] Lockfile found for %s:%s (%s/%s).\n" % (pkg_prefix, name, ctx.rel or ".", lf) +
-                    "Ensure the following is present in your MODULE.bazel:\n\n" +
-                    'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
-                    "dnfo.lock(\n" +
-                    '    name = "%s",\n' % repo_name +
-                    '    lockfile = "%s:%s",\n' % (pkg_prefix, lf) +
-                    ")\n" +
-                    'use_repo(dnfo, "%s")\n' % repo_name,
-                )
+                lf = _lockfile_for(config_name)
+                repo_name = name + "_packages"
+                if ctx.properties["dnfo_lock_hint"]:
+                    print(
+                        "\n[gazelle-dnfo] Lockfile found for %s:%s (%s/%s).\n" % (pkg_prefix, name, ctx.rel or ".", lf) +
+                        "Ensure the following is present in your MODULE.bazel:\n\n" +
+                        'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
+                        "dnfo.lock(\n" +
+                        '    name = "%s",\n' % repo_name +
+                        '    lockfile = "%s:%s",\n' % (pkg_prefix, lf) +
+                        ")\n" +
+                        'use_repo(dnfo, "%s")\n' % repo_name,
+                    )
         else:
             attrs["lock_only"] = True
             pkg_prefix = "//" + ctx.rel if ctx.rel else "//"
@@ -526,4 +523,7 @@ aspect.orion_extension(
     id = "gazelle-dnfo",
     prepare = _prepare,
     declare = _declare,
+    properties = {
+        "dnfo_lock_hint": aspect.Property(type = "bool", default = True),
+    },
 )

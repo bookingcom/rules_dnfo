@@ -150,6 +150,9 @@ bazel run //:gazelle-dnfo
 
 Gazelle detects that all required lockfiles are present on disk and flips `lock_only = False` in `BUILD.bazel`, enabling the complete multi-platform image build pipeline.
 
+> [!TIP]
+> Gazelle prints registration snippets to assist with onboarding new lockfiles. Once repositories are registered in `MODULE.bazel`, you can suppress these hints by setting `# gazelle:dnfo_lock_hint false` in your `BUILD.bazel`.
+
 ---
 
 ### Automated Onboarding & Update Tool
