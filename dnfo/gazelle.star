@@ -33,6 +33,7 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "exclude_build_id",
         "install_langs",
         "locale",
+        "certificates",
     ],
 })
 
@@ -448,6 +449,29 @@ def _declare(ctx):
                                 files_list.append(entry)
                     if files_list:
                         attrs["files"] = files_list
+
+        # Certificates support
+        certs_data = data.get("certificates")
+        if certs_data != None:
+            if type(certs_data) == "dict":
+                certs_dict = dict(certs_data)
+                if "additional" in certs_dict and type(certs_dict["additional"]) == "list":
+                    new_additional = []
+                    for item in certs_dict["additional"]:
+                        if type(item) == "dict":
+                            new_item = dict(item)
+                            src = new_item.get("source", new_item.get("src"))
+                            if src:
+                                new_item["source"] = _resolve_file_label(ctx.rel, src)
+                                if "src" in new_item:
+                                    new_item.pop("src")
+                            new_additional.append(new_item)
+                        elif type(item) == "string":
+                            new_additional.append({"source": _resolve_file_label(ctx.rel, item)})
+                    certs_dict["additional"] = new_additional
+                attrs["certificates"] = certs_dict
+            elif type(certs_data) == "list":
+                attrs["certificates"] = certs_data
 
         # Lockfile check
         has_lock = False
