@@ -59,14 +59,20 @@ def discover_lock_targets(workspace_root):
         log(f"Bazel query failed with exit code {e.returncode}")
         sys.exit(e.returncode)
 
-    targets = []
+    file_targets = []
+    multirun_targets = {}
     root = ET.fromstring(xml_out)
     for rule in root.findall("rule"):
         lock_target = rule.get("name")
         gen_elem = rule.find("./string[@name='generator_name']")
-        target_name = gen_elem.get("value")
+        target_name = gen_elem.get("value") if gen_elem is not None else lock_target.split(":")[-1].split(".")[0]
+        rule_class = rule.get("class", "")
         out_elem = rule.find("./string[@name='out_file']")
         out_file = out_elem.get("value") if out_elem is not None else None
+
+        if rule_class == "multirun" or out_file is None:
+            multirun_targets[target_name] = lock_target
+            continue
 
         # Clean out_file to standard repo-relative label format
         if out_file and out_file.startswith("@@//"):
@@ -75,17 +81,42 @@ def discover_lock_targets(workspace_root):
             lock_label = out_file
         else:
             pkg = lock_target.split(":")[0]
-            lock_label = f"{pkg}:{target_name}.lock.json"
+            clean_out = out_file if out_file else f"{target_name}.lock.json"
+            lock_label = f"{pkg}:{clean_out}"
 
-        repo_name = f"{target_name}_packages"
-        targets.append({
+        fname = os.path.basename(lock_label)
+        parts = fname.split(".")
+        if len(parts) >= 4 and parts[-2] == "lock" and parts[-1] == "json":
+            arch = parts[-3]
+            repo_name = f"{target_name}_{arch}_packages"
+        else:
+            repo_name = f"{target_name}_packages"
+
+        file_targets.append({
             "lock_target": lock_target,
             "target_name": target_name,
             "lock_label": lock_label,
             "repo_name": repo_name,
         })
 
-    return targets
+    targets_to_run = []
+    seen = set()
+    for item in file_targets:
+        tname = item["target_name"]
+        if tname in multirun_targets:
+            m_target = multirun_targets[tname]
+            if m_target not in seen:
+                targets_to_run.append(m_target)
+                seen.add(m_target)
+        else:
+            if item["lock_target"] not in seen:
+                targets_to_run.append(item["lock_target"])
+                seen.add(item["lock_target"])
+
+    return {
+        "targets_to_run": targets_to_run,
+        "registrations": file_targets,
+    }
 
 def register_in_module_bazel(module_path, buildozer_bin, repo_name, lock_label):
     # 1. Use buildozer to check if dnfo.lock is already defined
@@ -141,20 +172,22 @@ def main():
 
     # Phase 2: Discover lock targets via Bazel query and run them
     log("=== Phase 2: Discovering and generating lockfiles via dnf5-prebuilt ===")
-    lock_targets = discover_lock_targets(workspace_root)
-    if not lock_targets:
+    discovered = discover_lock_targets(workspace_root)
+    targets_to_run = discovered["targets_to_run"]
+    registrations = discovered["registrations"]
+    if not targets_to_run:
         log("No dnfo_image lock targets found in workspace.")
         return
 
-    log(f"Discovered {len(lock_targets)} lock target(s): {[t['lock_target'] for t in lock_targets]}")
-    for item in lock_targets:
-        log(f"Generating lockfile for {item['lock_target']}...")
-        run_bazel(["run", item["lock_target"]], cwd=workspace_root)
+    log(f"Discovered {len(targets_to_run)} lock runner target(s): {targets_to_run}")
+    for target in targets_to_run:
+        log(f"Generating lockfile via {target}...")
+        run_bazel(["run", target], cwd=workspace_root)
 
     # Phase 3: Register lockfiles into MODULE.bazel using buildozer and tidy
     log("=== Phase 3: Registering lockfiles in MODULE.bazel ===")
     module_path = os.path.join(workspace_root, "MODULE.bazel")
-    for item in lock_targets:
+    for item in registrations:
         register_in_module_bazel(module_path, buildozer, item["repo_name"], item["lock_label"])
     run_bazel(["mod", "tidy"], cwd=workspace_root)
 

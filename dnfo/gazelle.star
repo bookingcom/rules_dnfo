@@ -10,9 +10,14 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "entrypoint",
         "cmd",
         "workdir",
+        "user",
+        "stop_signal",
+        "labels",
+        "annotations",
         "env",
         "accounts",
         "architecture",
+        "archs",
         "base",
         "base_rpmdb",
         "base_rpmdb_file",
@@ -36,12 +41,31 @@ _DNFO_GLOBS = [
     "*dnfo*.yml",
 ]
 
-def _lockfile_for(config_name):
-    if config_name.endswith(".yaml"):
-        return config_name[:-len(".yaml")] + ".lock.json"
-    if config_name.endswith(".yml"):
-        return config_name[:-len(".yml")] + ".lock.json"
-    return config_name + ".lock.json"
+def _normalize_arch(arch):
+    a = arch.lower().strip()
+    if a in ("x86_64", "x86-64", "amd64"):
+        return "x86_64"
+    if a in ("aarch64", "arm64", "arm64v8"):
+        return "aarch64"
+    if a in ("armv7", "armv7l", "armv7hl", "armhfp"):
+        return "armv7hl"
+    if a in ("ppc64le", "powerpc64le"):
+        return "ppc64le"
+    if a in ("s390x",):
+        return "s390x"
+    if a in ("riscv64",):
+        return "riscv64"
+    return a
+
+def _lockfile_for(config_name, arch = None):
+    stem = config_name
+    if stem.endswith(".yaml"):
+        stem = stem[:-len(".yaml")]
+    elif stem.endswith(".yml"):
+        stem = stem[:-len(".yml")]
+    if arch:
+        return stem + "." + arch + ".lock.json"
+    return stem + ".lock.json"
 
 def _target_name(rel, config_name, total_files):
     base = rel.split("/")[-1] if rel else "image"
@@ -150,8 +174,6 @@ def _declare(ctx):
             continue
 
         config_name = s.path.split("/")[-1] if "/" in s.path else s.path
-        lockfile_name = _lockfile_for(config_name)
-        has_lock = ctx.has_file(lockfile_name)
         name = _target_name(ctx.rel, config_name, total_files)
 
         attrs = {
@@ -185,10 +207,22 @@ def _declare(ctx):
                 attrs["keyring"] = kr
 
         # Architectures
-        archs = data.get("archs")
-        if archs and type(archs) == "list" and len(archs) > 0:
-            if archs[0] != "x86_64":
-                attrs["architecture"] = archs[0]
+        raw_archs = data.get("archs")
+        if not raw_archs:
+            raw_archs = data.get("architectures")
+
+        norm_archs = []
+        if raw_archs:
+            if type(raw_archs) == "list":
+                for a in raw_archs:
+                    na = _normalize_arch(str(a))
+                    if na not in norm_archs:
+                        norm_archs.append(na)
+            elif type(raw_archs) == "string":
+                norm_archs.append(_normalize_arch(str(raw_archs)))
+
+        if norm_archs:
+            attrs["archs"] = norm_archs
 
         # Entrypoint
         ep = data.get("entrypoint")
@@ -225,6 +259,30 @@ def _declare(ctx):
         acc = data.get("accounts")
         if acc and type(acc) == "dict":
             attrs["accounts"] = acc
+
+        # User (process execution user)
+        user = data.get("user")
+        if user == None:
+            user = data.get("run-as", data.get("run_as"))
+        if user == None and acc:
+            user = acc.get("run-as", acc.get("run_as", acc.get("user")))
+        if user != None:
+            attrs["user"] = str(user)
+
+        # Stop Signal
+        stop_sig = data.get("stop-signal", data.get("stop_signal"))
+        if stop_sig and type(stop_sig) == "string":
+            attrs["stop_signal"] = stop_sig
+
+        # Labels
+        lbls = data.get("labels")
+        if lbls and type(lbls) == "dict":
+            attrs["labels"] = lbls
+
+        # Annotations
+        annos = data.get("annotations")
+        if annos and type(annos) == "dict":
+            attrs["annotations"] = annos
 
         # Base image
         base = data.get("base")
@@ -391,27 +449,67 @@ def _declare(ctx):
                     if files_list:
                         attrs["files"] = files_list
 
+        # Lockfile check
+        has_lock = False
+        if not pkgs:
+            has_lock = True
+        elif norm_archs and len(norm_archs) > 1:
+            all_exist = True
+            for a in norm_archs:
+                lf = _lockfile_for(config_name, a)
+                if not ctx.has_file(lf):
+                    all_exist = False
+                    break
+            has_lock = all_exist
+        else:
+            lockfile_name = _lockfile_for(config_name)
+            has_lock = ctx.has_file(lockfile_name)
+
         if not pkgs:
             attrs["lock_only"] = False
         elif has_lock:
             attrs["lock_only"] = False
             pkg_prefix = "//" + ctx.rel if ctx.rel else "//"
-            repo_name = name + "_packages"
-            print(
-                "\n[gazelle-dnfo] Lockfile found for %s:%s (%s/%s).\n" % (pkg_prefix, name, ctx.rel or ".", lockfile_name) +
-                "Ensure the following is present in your MODULE.bazel:\n\n" +
-                'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
-                "dnfo.lock(\n" +
-                '    name = "%s",\n' % repo_name +
-                '    lockfile = "%s:%s",\n' % (pkg_prefix, lockfile_name) +
-                ")\n" +
-                'use_repo(dnfo, "%s")\n' % repo_name,
-            )
+            if norm_archs and len(norm_archs) > 1:
+                lock_lines = []
+                repo_names = []
+                for a in norm_archs:
+                    rname = "%s_%s_packages" % (name, a)
+                    lf = _lockfile_for(config_name, a)
+                    repo_names.append('"%s"' % rname)
+                    lock_lines.append(
+                        'dnfo.lock(\n    name = "%s",\n    lockfile = "%s:%s",\n)' % (rname, pkg_prefix, lf)
+                    )
+                print(
+                    ("\n[gazelle-dnfo] Multi-arch lockfiles found for %s:%s.\n" % (pkg_prefix, name)) +
+                    "Ensure the following is present in your MODULE.bazel:\n\n" +
+                    'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
+                    "\n".join(lock_lines) + "\n" +
+                    ("use_repo(dnfo, %s)\n" % ", ".join(repo_names))
+                )
+            else:
+                arch_for_lock = norm_archs[0] if norm_archs else None
+                if arch_for_lock and ctx.has_file(_lockfile_for(config_name, arch_for_lock)):
+                    lf = _lockfile_for(config_name, arch_for_lock)
+                    repo_name = "%s_%s_packages" % (name, arch_for_lock)
+                else:
+                    lf = _lockfile_for(config_name)
+                    repo_name = name + "_packages"
+                print(
+                    "\n[gazelle-dnfo] Lockfile found for %s:%s (%s/%s).\n" % (pkg_prefix, name, ctx.rel or ".", lf) +
+                    "Ensure the following is present in your MODULE.bazel:\n\n" +
+                    'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
+                    "dnfo.lock(\n" +
+                    '    name = "%s",\n' % repo_name +
+                    '    lockfile = "%s:%s",\n' % (pkg_prefix, lf) +
+                    ")\n" +
+                    'use_repo(dnfo, "%s")\n' % repo_name,
+                )
         else:
             attrs["lock_only"] = True
             pkg_prefix = "//" + ctx.rel if ctx.rel else "//"
             print(
-                "\n[gazelle-dnfo] No lockfile found for %s:%s (expected %s).\n" % (pkg_prefix, name, lockfile_name) +
+                "\n[gazelle-dnfo] Lockfile(s) missing for %s:%s.\n" % (pkg_prefix, name) +
                 "Generated skeleton with lock_only = True.\n" +
                 "Next steps:\n" +
                 "  Step 2: bazel run %s:%s.lock\n" % (pkg_prefix, name) +

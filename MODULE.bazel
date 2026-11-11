@@ -9,6 +9,7 @@ bazel_dep(name = "bazel_skylib", version = "1.9.2")
 bazel_dep(name = "bazel_lib", version = "3.7.2")
 bazel_dep(name = "tar.bzl", version = "0.10.9")
 bazel_dep(name = "rules_img", version = "0.3.25")
+bazel_dep(name = "rules_multirun", version = "0.14.0")
 bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.29")
 bazel_dep(name = "buildifier_prebuilt", version = "10.1.0")
 bazel_dep(name = "aspect_rules_py", version = "2.0.0-alpha.10")
@@ -50,12 +51,17 @@ dnfo_test = use_extension(
     dev_dependency = True,
 )
 dnfo_test.lock(
-    name = "minimal_packages",
-    lockfile = "//examples/minimal:dnfo.lock.json",
+    name = "minimal_x86_64_packages",
+    lockfile = "//examples/minimal:dnfo.x86_64.lock.json",
+)
+dnfo_test.lock(
+    name = "minimal_aarch64_packages",
+    lockfile = "//examples/minimal:dnfo.aarch64.lock.json",
 )
 use_repo(
     dnfo_test,
-    "minimal_packages",
+    "minimal_aarch64_packages",
+    "minimal_x86_64_packages",
 )
 
 bsd_tar_toolchains = use_extension("@tar.bzl//tar:extensions.bzl", "toolchains")

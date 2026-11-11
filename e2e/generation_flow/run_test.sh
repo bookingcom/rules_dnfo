@@ -605,4 +605,112 @@ fi
 
 echo "Phase 10 verified: path exclusions, locale filtering, and license retention validated in output layer."
 
+echo ""
+echo "--- Phase 11: Multi-architecture images, multirun locking, and manifest user ---"
+
+mkdir -p test_multiarch
+cat > test_multiarch/dnfo.yaml <<EOF
+user: nonroot
+archs:
+  - amd64
+  - arm64
+contents:
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/\$basearch/
+      gpgcheck: 0
+  packages:
+    - bash
+EOF
+
+# 1. Run gazelle to generate skeleton with normalized archs and user
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+echo "Generated test_multiarch/BUILD.bazel:"
+cat test_multiarch/BUILD.bazel
+
+if ! grep -q 'user = "nonroot"' test_multiarch/BUILD.bazel; then
+  echo "ERROR: Phase 11 failed: expected 'user = \"nonroot\"' in test_multiarch/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q 'x86_64' test_multiarch/BUILD.bazel || ! grep -q 'aarch64' test_multiarch/BUILD.bazel; then
+  echo "ERROR: Phase 11 failed: expected normalized archs 'x86_64' and 'aarch64' in test_multiarch/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q 'lock_only = True' test_multiarch/BUILD.bazel; then
+  echo "ERROR: Phase 11 failed: expected 'lock_only = True' in test_multiarch/BUILD.bazel" >&2
+  exit 1
+fi
+echo "Phase 11 step 1 verified: Gazelle normalized amd64/arm64 to x86_64/aarch64 and generated user = 'nonroot'."
+
+# 2. Run multirun alias target to update both lockfiles in a single invocation
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_multiarch:test_multiarch.lock
+
+if [[ ! -f test_multiarch/dnfo.x86_64.lock.json ]]; then
+  echo "ERROR: Phase 11 failed: test_multiarch/dnfo.x86_64.lock.json was not generated!" >&2
+  exit 1
+fi
+if [[ ! -f test_multiarch/dnfo.aarch64.lock.json ]]; then
+  echo "ERROR: Phase 11 failed: test_multiarch/dnfo.aarch64.lock.json was not generated!" >&2
+  exit 1
+fi
+
+if ! grep -q '"arch":"x86_64,noarch"' test_multiarch/dnfo.x86_64.lock.json; then
+  echo "ERROR: Phase 11 failed: x86_64 lockfile does not declare x86_64,noarch arch!" >&2
+  exit 1
+fi
+if ! grep -q '"arch":"aarch64,noarch"' test_multiarch/dnfo.aarch64.lock.json; then
+  echo "ERROR: Phase 11 failed: aarch64 lockfile does not declare aarch64,noarch arch!" >&2
+  exit 1
+fi
+echo "Phase 11 step 2 verified: multirun generated both x86_64,noarch and aarch64,noarch lockfiles."
+
+# 3. Register both lockfiles in MODULE.bazel
+cat >> MODULE.bazel <<EOF
+
+dnfo.lock(
+    name = "test_multiarch_x86_64_packages",
+    lockfile = "//test_multiarch:dnfo.x86_64.lock.json",
+)
+dnfo.lock(
+    name = "test_multiarch_aarch64_packages",
+    lockfile = "//test_multiarch:dnfo.aarch64.lock.json",
+)
+use_repo(
+    dnfo,
+    "test_multiarch_aarch64_packages",
+    "test_multiarch_x86_64_packages",
+)
+EOF
+
+# 4. Flip lock_only = False with gazelle
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+echo "Updated test_multiarch/BUILD.bazel:"
+cat test_multiarch/BUILD.bazel
+
+if grep -q 'lock_only = True' test_multiarch/BUILD.bazel; then
+  echo "ERROR: Phase 11 failed: lock_only was not flipped to False!" >&2
+  exit 1
+fi
+
+# 5. Build multi-arch image index and test lock diffs
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_multiarch:all
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel test --invocation_id="${INVOCATION_ID}" //test_multiarch:test_multiarch.x86_64.lock_test //test_multiarch:test_multiarch.aarch64.lock_test
+
+INDEX_JSON="$(bazel info bazel-bin)/test_multiarch/test_multiarch_index.json"
+if ! grep -q '"architecture":"amd64"' "${INDEX_JSON}" || ! grep -q '"architecture":"arm64"' "${INDEX_JSON}"; then
+  echo "ERROR: Phase 11 failed: image index does not contain both amd64 and arm64 descriptors!" >&2
+  exit 1
+fi
+
+CONFIG_JSON="$(find "$(bazel info output_path)" -name "test_multiarch_x86_64_config.json" | head -n 1)"
+if ! grep -q '"User":"nonroot"' "${CONFIG_JSON}"; then
+  echo "ERROR: Phase 11 failed: manifest config does not contain 'User':'nonroot'!" >&2
+  exit 1
+fi
+
+echo "Phase 11 verified: multi-arch image index, rules_multirun companion target, and manifest user execution verified successfully."
+
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="

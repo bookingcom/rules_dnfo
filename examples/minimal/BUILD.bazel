@@ -19,6 +19,10 @@ dnfo_image(
             },
         ],
     },
+    archs = [
+        "x86_64",
+        "aarch64",
+    ],
     cmd = ["-l"],
     config = "dnfo.yaml",
     entrypoint = ["/bin/bash"],
@@ -39,5 +43,6 @@ dnfo_image(
         "id": "baseos",
         "name": "BaseOS",
     }],
+    user = "nonroot",
     workdir = "/home",
 )
