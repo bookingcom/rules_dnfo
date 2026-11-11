@@ -23,12 +23,12 @@ Add to your `MODULE.bazel`:
 bazel_dep(name = "rules_dnfo", version = "0.0.1")
 
 # dnf5-prebuilt dependency override (until published to BCR)
-bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.5")
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.7")
 archive_override(
     module_name = "dnf5-prebuilt",
-    integrity = "sha256-Plm67w2RlJ/trfQaAczblLpMa6zFjcMO3xDW5cHpp4Q=",
-    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.5",
-    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.5/dnf5-prebuilt-v5.4.6.0.bcr.5.tar.gz"],
+    integrity = "sha256-VsPvx5ZNZIyB6u2qJ06lfcL3OBCpGQjZCEzEZLR6qfQ=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.7",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.7/dnf5-prebuilt-v5.4.6.0.bcr.7.tar.gz"],
 )
 ```
 
@@ -279,6 +279,54 @@ When you run `bazel run //:gazelle-dnfo`, Gazelle automatically:
 3. Generates the corresponding `files = ...` attribute on `dnfo_image` in `BUILD.bazel`.
 4. Assembles an isolated file layer via `rules_img` stacked cleanly on top of the RPM package layer and base image.
 5. If an image specification contains only files without RPM packages, Gazelle automatically enables the image target (`lock_only = False`) without requiring lockfile generation.
+
+---
+
+## Path Exclusions & Locale Filtering (`exclude_paths:`, `locale:`)
+
+`rules_dnfo` supports minimal container layers by allowing you to filter out unused locale catalogs and exclude arbitrary directory and file paths from the assembled RPM layer.
+
+### Setting the Locale (`locale:`, `install_langs:`)
+
+You can specify the language locale(s) to retain in your image (mimicking DNF `--setopt=install_langs=...` and RPM `%_install_langs`):
+
+```yaml
+# In dnfo.yaml (top-level or under contents:)
+locale: en_US.UTF-8
+
+# Or multiple locales:
+# locales:
+#   - en_US.UTF-8
+#   - nl_NL.UTF-8
+```
+
+When configured:
+1. `rules_dnfo` passes `install_langs` to `dnf_config`, guiding DNF5 dependency resolution and configuration.
+2. `rpm_layer` filters translation catalogs in `/usr/share/locale` and `/usr/lib/locale`, eliminating hundreds of megabytes of unused languages while retaining the specified locale(s) and base C/POSIX locales.
+3. Automatically sets the container's `LANG` environment variable (e.g. `LANG=en_US.UTF-8`) in the image manifest if not already explicitly defined in `environment:`.
+
+### Excluding Paths and Minimal Layers (`exclude_paths:`, `exclude_patterns:`)
+
+By default, `rules_dnfo` produces minimal container layers by automatically excluding documentation (`*/share/doc/*`, `*/share/info/*`), man pages (`*/share/man/*`), license notices (`*/share/licenses/*`), and `.build-id` debug links via `dnf5-prebuilt`.
+
+You can exclude additional directory trees or file patterns, or selectively toggle default exclusions:
+
+```yaml
+# In dnfo.yaml (top-level or under contents:)
+exclude_paths:
+  - /etc/skel
+  - /usr/share/zoneinfo
+
+exclude_patterns:
+  - "*.a"
+  - "*/cracklib/*"
+
+# Optionally preserve license notices for compliance:
+exclude_licenses: false
+```
+
+- **Path Normalization**: Absolute paths (e.g. `/etc/skel`) and relative patterns are automatically normalized and expanded so they match entries during `bsdtar` extraction.
+- **Exclusion Toggles**: Boolean flags `exclude_docs`, `exclude_man`, `exclude_licenses`, and `exclude_build_id` can be set to `true` or `false` in `dnfo.yaml`.
 
 ---
 
