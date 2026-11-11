@@ -6,10 +6,11 @@ Inspired by [rules_apko](https://github.com/chainguard-dev/rules_apko), `rules_d
 
 ## Features
 
-- **Declarative Image Specifications**: Define packages, repositories, accounts, entrypoints, and environment variables in clean YAML syntax (`*dnfo*.ya?ml`).
+- **Declarative Image Specifications**: Define packages, repositories, accounts, user execution, entrypoints, and environment variables in clean YAML syntax (`*dnfo*.ya?ml`).
+- **Multi-Architecture Support**: Build multi-platform container images (`image_index`) across `x86_64` (or `amd64`), `aarch64` (or `arm64`), etc., with per-architecture lockfiles and single-command locking via `rules_multirun`.
 - **Gazelle-Driven 3-Phase Workflow**: Orion Gazelle extension (`gazelle-dnfo`) generates and maintains `BUILD.bazel` targets automatically.
 - **Hermetic DNF5 Dependency Solving**: Transitive RPM dependency resolution and lockfile generation powered by [dnf5-prebuilt](https://github.com/bookingcom/dnf5-prebuilt).
-- **Reproducible Lockfiles**: Locks resolved RPM packages with SRI integrity hashes into `dnfo.lock.json`.
+- **Reproducible Lockfiles**: Locks resolved RPM packages with SRI integrity hashes into `dnfo.<arch>.lock.json` or `dnfo.lock.json`.
 - **GPG Key Verification**: RPM package authenticity verified via GPG keys through `rpm_layer`.
 - **Fast Layer Assembly**: Seamless integration with `rules_img` (`rpm_layer`, `linux_skeleton`, `etc_passwd`, `image_load`) for multi-layer container assembly and instant local image loading (`bazel run //path/to:image.load`).
 
@@ -96,8 +97,11 @@ accounts:
     - groupname: nonroot
       gid: 65532
 
+user: nonroot
+
 archs:
   - x86_64
+  - aarch64
 ```
 
 Run Gazelle:
@@ -119,19 +123,23 @@ Run the companion lock target generated in your package:
 bazel run //path/to:image.lock
 ```
 
-This invokes `dnf5-prebuilt` to resolve all transitive dependencies and outputs `dnfo.lock.json` with SRI integrity hashes.
+For multi-architecture configurations, `rules_dnfo` uses [rules_multirun](https://github.com/keith/rules_multirun) to run the lock generation for all configured architectures in one single invocation. This invokes `dnf5-prebuilt` for each architecture (e.g. `x86_64,noarch` and `aarch64,noarch`) and generates `dnfo.<arch>.lock.json` with SRI integrity hashes. You can also run individual architecture lock targets (e.g. `bazel run //path/to:image_x86_64.lock`).
 
 ### Step 3: Register Lock in MODULE.bazel and Flip Flag
 
-Register the generated lockfile in `MODULE.bazel`:
+Register the generated lockfile(s) in `MODULE.bazel`:
 
 ```starlark
 dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")
 dnfo.lock(
-    name = "image_packages",
-    lockfile = "//path/to:dnfo.lock.json",
+    name = "image_x86_64_packages",
+    lockfile = "//path/to:dnfo.x86_64.lock.json",
 )
-use_repo(dnfo, "image_packages")
+dnfo.lock(
+    name = "image_aarch64_packages",
+    lockfile = "//path/to:dnfo.aarch64.lock.json",
+)
+use_repo(dnfo, "image_x86_64_packages", "image_aarch64_packages")
 ```
 
 Run Gazelle:
@@ -140,7 +148,7 @@ Run Gazelle:
 bazel run //:gazelle-dnfo
 ```
 
-Gazelle detects that `dnfo.lock.json` is present on disk and flips `lock_only = False` in `BUILD.bazel`, enabling the complete image build pipeline.
+Gazelle detects that all required lockfiles are present on disk and flips `lock_only = False` in `BUILD.bazel`, enabling the complete multi-platform image build pipeline.
 
 ---
 
@@ -168,6 +176,97 @@ Or load it directly into Docker/Podman:
 
 ```bash
 bazel run //path/to:image.load
+```
+
+---
+
+## Multi-Architecture Images
+
+`rules_dnfo` supports building multi-platform container images with an OCI `image_index` wrapping per-architecture image manifests.
+
+### Configuring Architectures
+
+Specify target architectures using the `archs:` list in your `dnfo.yaml`:
+
+```yaml
+archs:
+  - x86_64   # or aliases: amd64, x86-64
+  - aarch64  # or alias: arm64
+```
+
+Supported architectures and aliases:
+- `x86_64` (aliases: `amd64`, `x86-64`)
+- `aarch64` (alias: `arm64`)
+- `armv7hl`
+- `ppc64le`
+- `s390x`
+- `riscv64`
+
+Each architecture is automatically paired with `noarch` during DNF5 dependency resolution (e.g., `x86_64,noarch` and `aarch64,noarch`).
+
+### Per-Architecture Lockfiles & Single-Command Locking
+
+Each architecture receives its own dedicated lockfile:
+- Single-arch default: `dnfo.lock.json`
+- Multi-arch: `dnfo.<arch>.lock.json` (e.g. `dnfo.x86_64.lock.json`, `dnfo.aarch64.lock.json`)
+
+To update all lockfiles in a single step, `rules_dnfo` integrates with `rules_multirun` to provide a companion `<name>.lock` target:
+
+```bash
+# Updates both x86_64 and aarch64 lockfiles sequentially
+bazel run //path/to:image.lock
+
+# Or update a specific architecture individually
+bazel run //path/to:image_x86_64.lock
+```
+
+### Generated Targets
+
+When `archs` has multiple architectures, `dnfo_image` generates:
+- `:image`: An OCI `image_index` combining all per-architecture manifests.
+- `:image_<arch>`: Individual `image_manifest` targets for each architecture (e.g. `:image_x86_64`, `:image_aarch64`).
+- `:image_<arch>.tar`: OCI tarball for the specific architecture.
+- `:image_<arch>.load`: Local container engine loader for the specific architecture.
+
+---
+
+## Container Execution User & Manifest Settings
+
+You can customize the container's runtime user and image manifest metadata directly from `dnfo.yaml`.
+
+### Execution User (`user:`, `run-as:`)
+
+By default, container images run as UID 0 (`root`). To specify a non-root execution user, configure `user:` (or `run-as:` / `accounts.run-as:`):
+
+```yaml
+accounts:
+  users:
+    - username: nonroot
+      uid: 65532
+      gid: 65532
+  groups:
+    - groupname: nonroot
+      gid: 65532
+
+user: nonroot
+# Or user: "65532:65532"
+```
+
+This sets the `User` field in the generated OCI container configuration, ensuring your container process runs as the specified user without root privileges.
+
+### Additional Manifest Fields
+
+You can also specify container lifecycle and annotation metadata in `dnfo.yaml`:
+
+```yaml
+stop_signal: SIGTERM
+
+labels:
+  maintainer: "Team Infrastructure"
+  org.opencontainers.image.source: "https://github.com/bookingcom/rules_dnfo"
+
+annotations:
+  org.opencontainers.image.description: "Minimal multi-arch base image"
 ```
 
 ---

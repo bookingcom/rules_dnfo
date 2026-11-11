@@ -31,5 +31,8 @@ accounts:
     - groupname: nonroot
       gid: 65532
 
+user: nonroot
+
 archs:
   - x86_64
+  - aarch64

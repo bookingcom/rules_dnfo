@@ -1,5 +1,6 @@
 # gazelle:resolve starlark @dnf5-prebuilt//dnf5-prebuilt:defs.bzl @dnf5-prebuilt//dnf5-prebuilt:defs.bzl
 # gazelle:resolve starlark @rules_containers_util//containers:defs.bzl @rules_containers_util//containers:defs.bzl
+# gazelle:resolve starlark @rules_multirun//:defs.bzl @rules_multirun//:defs.bzl
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
@@ -15,5 +16,6 @@ bzl_library(
         "@rules_img//img:image",
         "@rules_img//img:layer",
         "@rules_img//img:load",
+        "@rules_multirun//:defs",
     ],
 )
