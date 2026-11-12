@@ -52,6 +52,8 @@ archive_override(
     urls = ["https://github.com/bookingcom/rules_containers_util/releases/download/v0.0.5/rules_containers_util-v0.0.5.tar.gz"],
 )
 
+bazel_dep(name = "rules_img", version = "0.3.25")
+
 bazel_dep(name = "tar.bzl", version = "0.10.9")
 
 bsd_tar_toolchains = use_extension("@tar.bzl//tar:extensions.bzl", "toolchains")
@@ -785,5 +787,74 @@ if echo "$OUTPUT_SUPPRESSED" | grep -q "\[gazelle-dnfo\] Multi-arch lockfiles fo
 fi
 
 echo "Phase 11 verified: multi-arch image index, single-arch aarch64 manifest platform, lock hint suppression, rules_multirun companion target, and manifest user execution verified successfully."
+
+echo ""
+echo "--- Phase 12: Test rules_img extra_layers injection ---"
+mkdir -p test_extra
+cat > test_extra/dnfo.yaml <<EOF
+contents:
+  packages:
+    - bash
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/\$basearch/
+      gpgcheck: 0
+  extra_layers:
+    - layer: :shared_layer
+    - arch: amd64
+      layer: :amd64_layer
+    - arch: arm64
+      layer: :arm64_layer
+EOF
+
+cat > test_extra/BUILD.bazel <<EOF
+load("@rules_img//img:layer.bzl", "image_layer")
+
+image_layer(
+    name = "shared_layer",
+    srcs = {
+        "/usr/share/shared.txt": ":shared.txt",
+    },
+)
+
+image_layer(
+    name = "amd64_layer",
+    srcs = {
+        "/usr/share/amd64.txt": ":amd64.txt",
+    },
+)
+
+image_layer(
+    name = "arm64_layer",
+    srcs = {
+        "/usr/share/arm64.txt": ":arm64.txt",
+    },
+)
+EOF
+touch test_extra/shared.txt test_extra/amd64.txt test_extra/arm64.txt
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //:gazelle-dnfo
+
+echo "Generated test_extra/BUILD.bazel:"
+cat test_extra/BUILD.bazel
+
+if ! grep -q 'extra_layers' test_extra/BUILD.bazel; then
+  echo "ERROR: Phase 12 failed: extra_layers not found in test_extra/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q '":shared_layer"' test_extra/BUILD.bazel; then
+  echo "ERROR: Phase 12 failed: :shared_layer not resolved in test_extra/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q '":amd64_layer"' test_extra/BUILD.bazel; then
+  echo "ERROR: Phase 12 failed: :amd64_layer not resolved in test_extra/BUILD.bazel" >&2
+  exit 1
+fi
+if ! grep -q '":arm64_layer"' test_extra/BUILD.bazel; then
+  echo "ERROR: Phase 12 failed: :arm64_layer not resolved in test_extra/BUILD.bazel" >&2
+  exit 1
+fi
+echo "Phase 12 verified: Gazelle generated extra_layers list of dicts."
 
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="

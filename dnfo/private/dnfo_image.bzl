@@ -186,7 +186,44 @@ def _normalize_arch(arch):
         return "s390x"
     if a in ("riscv64",):
         return "riscv64"
+    if a == "noarch":
+        return "noarch"
     return a
+
+def _layers_for_arch(extra_layers, arch):
+    """Returns the list of extra layers applicable to architecture `arch`.
+
+    `extra_layers` is a list of dicts, where each dict has:
+      - 'layer': Label of the layer target.
+      - 'arch' (optional): Target architecture (e.g. 'x86_64', 'aarch64').
+        If omitted, the layer applies to all architectures.
+    The list is iterated in the exact order specified.
+    """
+    if not extra_layers:
+        return []
+
+    if type(extra_layers) != "list":
+        fail("extra_layers must be a list of layer entries (dicts or labels), got %s" % type(extra_layers))
+
+    norm_target_arch = _normalize_arch(arch)
+    result = []
+
+    for item in extra_layers:
+        if type(item) == "string":
+            result.append(item)
+        elif type(item) == "dict":
+            layer = item.get("layer")
+            if not layer:
+                fail("extra_layers entry dict must contain a 'layer' key, got: %s" % item)
+            item_arch = item.get("arch")
+            if not item_arch or item_arch == "noarch":
+                result.append(layer)
+            elif _normalize_arch(item_arch) == norm_target_arch:
+                result.append(layer)
+        else:
+            fail("extra_layers items must be dicts with 'layer' and optional 'arch', got: %s" % type(item))
+
+    return result
 
 def _platform_for_arch(arch):
     if arch == "x86_64":
@@ -317,6 +354,7 @@ def dnfo_image(
         install_langs = None,
         locale = None,
         certificates = None,
+        extra_layers = None,
         **kwargs):
     """Builds an OCI container image or multi-arch image index from RPM packages declared in dnfo YAML.
 
@@ -370,9 +408,14 @@ def dnfo_image(
       exclude_build_id: Optional boolean flag to exclude .build-id debug links.
       install_langs: Optional language locales to keep.
       locale: Optional locale alias for install_langs; also sets default LANG in image manifest.
+      certificates: Optional SSL/TLS CA certificate configuration.
+      extra_layers: Optional list of dicts with 'layer' and optional 'arch' to inject into the image.
       **kwargs: Additional arguments forwarded to rules_img.
     """
     visibility = kwargs.get("visibility", ["//visibility:public"])
+
+    if extra_layers != None and type(extra_layers) != "list":
+        fail("extra_layers in %s must be a list of layer entries (dicts or labels), got %s" % (name, type(extra_layers)))
 
     # Resolve architectures
     raw_archs = []
@@ -859,6 +902,10 @@ def dnfo_image(
             if files_layer_label:
                 arch_layers.append(files_layer_label)
 
+            arch_extra = _layers_for_arch(extra_layers, a)
+            if arch_extra:
+                arch_layers.extend(arch_extra)
+
             arch_manifest_kwargs = {}
             if base:
                 arch_manifest_kwargs["base"] = base
@@ -943,6 +990,10 @@ def dnfo_image(
         layers.append(base_layer_label)
     if files_layer_label:
         layers.append(files_layer_label)
+
+    single_extra = _layers_for_arch(extra_layers, arch)
+    if single_extra:
+        layers.extend(single_extra)
 
     manifest_kwargs = {}
     if target_platform:
