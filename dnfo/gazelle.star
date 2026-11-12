@@ -35,6 +35,8 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "locale",
         "certificates",
         "extra_layers",
+        "flatten_all_layers",
+        "flatten_dnfo_layers",
     ],
 })
 
@@ -500,6 +502,19 @@ def _declare(ctx):
                     attrs["extra_layers"] = resolved_layers
             else:
                 fail("extra_layers must be a list of layer entries in %s" % (ctx.rel or "."))
+
+        # Layer flattening options
+        flatten_all = data.get("flatten_all_layers", data.get("flatten-all-layers"))
+        if flatten_all == None and contents and type(contents) == "dict":
+            flatten_all = contents.get("flatten_all_layers", contents.get("flatten-all-layers"))
+        if flatten_all != None and type(flatten_all) == "bool":
+            attrs["flatten_all_layers"] = flatten_all
+
+        flatten_dnfo = data.get("flatten_dnfo_layers", data.get("flatten-dnfo-layers"))
+        if flatten_dnfo == None and contents and type(contents) == "dict":
+            flatten_dnfo = contents.get("flatten_dnfo_layers", contents.get("flatten-dnfo-layers"))
+        if flatten_dnfo != None and type(flatten_dnfo) == "bool":
+            attrs["flatten_dnfo_layers"] = flatten_dnfo
 
         # Lockfile check
         has_lock = False

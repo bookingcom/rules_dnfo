@@ -857,4 +857,118 @@ if ! grep -q '":arm64_layer"' test_extra/BUILD.bazel; then
 fi
 echo "Phase 12 verified: Gazelle generated extra_layers list of dicts."
 
+# 12b: Test flatten-all-layers: true
+mkdir -p test_flatten_all
+cat > test_flatten_all/dnfo.yaml <<EOF
+flatten-all-layers: true
+contents:
+  packages:
+    - bash
+EOF
+
+cat > test_flatten_all/BUILD.bazel <<EOF
+load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
+load("@rules_img//img:layer.bzl", "image_layer")
+
+image_layer(
+    name = "extra_layer_1",
+    srcs = {
+        "/usr/share/extra1.txt": ":extra1.txt",
+    },
+)
+
+image_layer(
+    name = "extra_layer_2",
+    srcs = {
+        "/usr/share/extra2.txt": ":extra2.txt",
+    },
+)
+
+dnfo_image(
+    name = "flatten_all_image",
+    config = "dnfo.yaml",
+    contents = "@testimage_packages//:rpms",
+    packages = ["bash"],
+    extra_layers = [
+        {"layer": ":extra_layer_1"},
+        {"layer": ":extra_layer_2"},
+    ],
+    flatten_all_layers = True,
+    lock_only = False,
+)
+EOF
+touch test_flatten_all/extra1.txt test_flatten_all/extra2.txt
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_flatten_all:flatten_all_image
+
+EXEC_ROOT=$(INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2 && bazel info --invocation_id="${INVOCATION_ID}" execution_root)
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2
+FLATTEN_ALL_REL=$(bazel cquery --invocation_id="${INVOCATION_ID}" //test_flatten_all:flatten_all_image --output=files | grep '_manifest\.json' | head -n1)
+FLATTEN_ALL_MANIFEST="${EXEC_ROOT}/${FLATTEN_ALL_REL}"
+LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${FLATTEN_ALL_MANIFEST}')); print(len(m.get('layers', [])))")
+
+if [[ "${LAYER_COUNT}" -ne 1 ]]; then
+  echo "ERROR: Phase 12b failed: expected exactly 1 layer with flatten_all_layers=True, got ${LAYER_COUNT}" >&2
+  exit 1
+fi
+echo "Phase 12b verified: flatten_all_layers produced a manifest with exactly 1 flattened layer."
+
+# 12c: Test flatten-dnfo-layers: true with base image
+mkdir -p test_flatten_dnfo
+cat > test_flatten_dnfo/dnfo.yaml <<EOF
+base: "//testimage:testimage"
+flatten-dnfo-layers: true
+contents:
+  packages:
+    - curl
+EOF
+
+# Build a layered image on top of testimage:testimage with extra layer + files
+cat > test_flatten_dnfo/BUILD.bazel <<EOF
+load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
+load("@rules_img//img:layer.bzl", "image_layer")
+
+image_layer(
+    name = "dnfo_extra_layer",
+    srcs = {
+        "/usr/share/dnfo_extra.txt": ":dnfo_extra.txt",
+    },
+)
+
+dnfo_image(
+    name = "flatten_dnfo_image",
+    base = "//testimage:testimage",
+    config = "dnfo.yaml",
+    contents = "@testimage_packages//:rpms",
+    packages = ["curl"],
+    extra_layers = [
+        {"layer": ":dnfo_extra_layer"},
+    ],
+    files = {
+        "/etc/my_dnfo_file.txt": ":my_dnfo_file.txt",
+    },
+    flatten_dnfo_layers = True,
+    lock_only = False,
+)
+EOF
+touch test_flatten_dnfo/dnfo_extra.txt test_flatten_dnfo/my_dnfo_file.txt
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //testimage:testimage //test_flatten_dnfo:flatten_dnfo_image
+
+BASE_REL=$(INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2 && bazel cquery --invocation_id="${INVOCATION_ID}" //testimage:testimage --output=files | grep '_manifest\.json' | head -n1)
+BASE_MANIFEST="${EXEC_ROOT}/${BASE_REL}"
+BASE_LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${BASE_MANIFEST}')); print(len(m.get('layers', [])))")
+CHILD_REL=$(INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2 && bazel cquery --invocation_id="${INVOCATION_ID}" //test_flatten_dnfo:flatten_dnfo_image --output=files | grep '_manifest\.json' | head -n1)
+CHILD_MANIFEST="${EXEC_ROOT}/${CHILD_REL}"
+CHILD_LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${CHILD_MANIFEST}')); print(len(m.get('layers', [])))")
+
+EXPECTED_CHILD_LAYERS=$((BASE_LAYER_COUNT + 1))
+if [[ "${CHILD_LAYER_COUNT}" -ne "${EXPECTED_CHILD_LAYERS}" ]]; then
+  echo "ERROR: Phase 12c failed: expected ${EXPECTED_CHILD_LAYERS} layers (base ${BASE_LAYER_COUNT} + 1 flattened dnfo layer), got ${CHILD_LAYER_COUNT}" >&2
+  exit 1
+fi
+echo "Phase 12c verified: flatten_dnfo_layers squashed all dnfo layers into 1 layer on top of base image (${BASE_LAYER_COUNT} base + 1 dnfo = ${CHILD_LAYER_COUNT} total)."
+
+echo "Phase 12 verified: extra_layers injection and layer flattening options validated successfully."
+
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="

@@ -29,9 +29,11 @@ bzl_library(
         "@dnf5-prebuilt//dnf5-prebuilt:defs.bzl",
         "@rules_containers_util//containers:defs",
         "@rules_img//img:base_images",
+        "@rules_img//img:convert",
         "@rules_img//img:image",
         "@rules_img//img:layer",
         "@rules_img//img:load",
+        "@rules_img//img:providers",
         "@rules_multirun//:defs",
     ],
 )
