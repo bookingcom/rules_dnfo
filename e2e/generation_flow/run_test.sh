@@ -857,6 +857,106 @@ if ! grep -q '":arm64_layer"' test_extra/BUILD.bazel; then
 fi
 echo "Phase 12 verified: Gazelle generated extra_layers list of dicts."
 
+# Ensure goss and dgoss are available for container image validation
+GOSS_BIN_DIR="${WORK_DIR}/bin"
+mkdir -p "${GOSS_BIN_DIR}"
+HOST_ARCH=$(uname -m)
+case "${HOST_ARCH}" in
+  x86_64|amd64) GOSS_ARCH="x86_64" ;;
+  aarch64|arm64) GOSS_ARCH="arm64" ;;
+  *) GOSS_ARCH="x86_64" ;;
+esac
+
+if ! command -v goss >/dev/null 2>&1; then
+  echo "Downloading goss for ${GOSS_ARCH}..."
+  curl -fsSL "https://github.com/goss-org/goss/releases/download/v0.4.10/goss_0.4.10_linux_${GOSS_ARCH}.tar.gz" | tar -xz -C "${GOSS_BIN_DIR}" goss
+  chmod +x "${GOSS_BIN_DIR}/goss"
+fi
+
+if ! command -v dgoss >/dev/null 2>&1; then
+  echo "Downloading dgoss..."
+  curl -fsSL -o "${GOSS_BIN_DIR}/dgoss" "https://github.com/goss-org/goss/releases/download/v0.4.10/dgoss"
+  chmod +x "${GOSS_BIN_DIR}/dgoss"
+fi
+
+export PATH="${GOSS_BIN_DIR}:${PATH}"
+export GOSS_PATH="$(which goss)"
+
+# 12a: Populate layer payload contents and build/load image into Docker
+echo "shared extra layer payload" > test_extra/shared.txt
+echo "amd64 extra layer payload" > test_extra/amd64.txt
+echo "arm64 extra layer payload" > test_extra/arm64.txt
+
+cat > test_extra/BUILD.bazel <<EOF
+load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
+load("@rules_img//img:layer.bzl", "image_layer")
+
+image_layer(
+    name = "shared_layer",
+    srcs = {
+        "/usr/share/shared.txt": ":shared.txt",
+    },
+)
+
+image_layer(
+    name = "amd64_layer",
+    srcs = {
+        "/usr/share/amd64.txt": ":amd64.txt",
+    },
+)
+
+image_layer(
+    name = "arm64_layer",
+    srcs = {
+        "/usr/share/arm64.txt": ":arm64.txt",
+    },
+)
+
+dnfo_image(
+    name = "test_extra",
+    config = "dnfo.yaml",
+    contents = "@testimage_packages//:rpms",
+    extra_layers = [
+        {
+            "layer": ":shared_layer",
+        },
+        {
+            "arch": "x86_64",
+            "layer": ":amd64_layer",
+        },
+        {
+            "arch": "aarch64",
+            "layer": ":arm64_layer",
+        },
+    ],
+    lock_only = False,
+    packages = ["bash"],
+)
+EOF
+
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_extra:test_extra_load
+
+# Run Goss validation against test_extra:latest
+cat > test_extra/goss.yaml <<EOF
+file:
+  /usr/share/shared.txt:
+    exists: true
+    contents:
+      - "shared extra layer payload"
+  /usr/share/amd64.txt:
+    exists: true
+    contents:
+      - "amd64 extra layer payload"
+  /usr/share/arm64.txt:
+    exists: false
+  /bin/bash:
+    exists: true
+    filetype: file
+EOF
+
+(cd test_extra && dgoss run --entrypoint /bin/sleep test_extra:latest 10)
+echo "Phase 12a verified: extra_layers image built and validated with Goss."
+
 # 12b: Test flatten-all-layers: true
 mkdir -p test_flatten_all
 cat > test_flatten_all/dnfo.yaml <<EOF
@@ -865,6 +965,9 @@ contents:
   packages:
     - bash
 EOF
+
+echo "flatten all extra 1 payload" > test_flatten_all/extra1.txt
+echo "flatten all extra 2 payload" > test_flatten_all/extra2.txt
 
 cat > test_flatten_all/BUILD.bazel <<EOF
 load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
@@ -897,7 +1000,6 @@ dnfo_image(
     lock_only = False,
 )
 EOF
-touch test_flatten_all/extra1.txt test_flatten_all/extra2.txt
 
 INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_flatten_all:flatten_all_image
 
@@ -913,6 +1015,26 @@ if [[ "${LAYER_COUNT}" -ne 1 ]]; then
 fi
 echo "Phase 12b verified: flatten_all_layers produced a manifest with exactly 1 flattened layer."
 
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_flatten_all:flatten_all_image_load
+
+cat > test_flatten_all/goss.yaml <<EOF
+file:
+  /usr/share/extra1.txt:
+    exists: true
+    contents:
+      - "flatten all extra 1 payload"
+  /usr/share/extra2.txt:
+    exists: true
+    contents:
+      - "flatten all extra 2 payload"
+  /bin/bash:
+    exists: true
+    filetype: file
+EOF
+
+(cd test_flatten_all && dgoss run --entrypoint /bin/sleep flatten_all_image:latest 10)
+echo "Phase 12b verified: flatten_all_layers image built and validated with Goss."
+
 # 12c: Test flatten-dnfo-layers: true with base image
 mkdir -p test_flatten_dnfo
 cat > test_flatten_dnfo/dnfo.yaml <<EOF
@@ -922,6 +1044,9 @@ contents:
   packages:
     - curl
 EOF
+
+echo "dnfo extra layer payload" > test_flatten_dnfo/dnfo_extra.txt
+echo "my dnfo file payload" > test_flatten_dnfo/my_dnfo_file.txt
 
 # Build a layered image on top of testimage:testimage with extra layer + files
 cat > test_flatten_dnfo/BUILD.bazel <<EOF
@@ -951,7 +1076,6 @@ dnfo_image(
     lock_only = False,
 )
 EOF
-touch test_flatten_dnfo/dnfo_extra.txt test_flatten_dnfo/my_dnfo_file.txt
 
 INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //testimage:testimage //test_flatten_dnfo:flatten_dnfo_image
 
@@ -969,6 +1093,29 @@ if [[ "${CHILD_LAYER_COUNT}" -ne "${EXPECTED_CHILD_LAYERS}" ]]; then
 fi
 echo "Phase 12c verified: flatten_dnfo_layers squashed all dnfo layers into 1 layer on top of base image (${BASE_LAYER_COUNT} base + 1 dnfo = ${CHILD_LAYER_COUNT} total)."
 
-echo "Phase 12 verified: extra_layers injection and layer flattening options validated successfully."
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_flatten_dnfo:flatten_dnfo_image_load
+
+cat > test_flatten_dnfo/goss.yaml <<EOF
+file:
+  /usr/share/dnfo_extra.txt:
+    exists: true
+    contents:
+      - "dnfo extra layer payload"
+  /etc/my_dnfo_file.txt:
+    exists: true
+    contents:
+      - "my dnfo file payload"
+  /usr/bin/curl:
+    exists: true
+    filetype: file
+  /bin/bash:
+    exists: true
+    filetype: file
+EOF
+
+(cd test_flatten_dnfo && dgoss run --entrypoint /bin/sleep flatten_dnfo_image:latest 10)
+echo "Phase 12c verified: flatten_dnfo_layers image built and validated with Goss."
+
+echo "Phase 12 verified: extra_layers injection and layer flattening options validated successfully with Goss."
 
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="
