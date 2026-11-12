@@ -34,6 +34,7 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "install_langs",
         "locale",
         "certificates",
+        "extra_layers",
     ],
 })
 
@@ -472,6 +473,33 @@ def _declare(ctx):
                 attrs["certificates"] = certs_dict
             elif type(certs_data) == "list":
                 attrs["certificates"] = certs_data
+
+        # Extra layers support (list of dicts with 'layer' and optional 'arch')
+        extra_layers_data = data.get("extra_layers", data.get("extra-layers"))
+        if not extra_layers_data and contents and type(contents) == "dict":
+            extra_layers_data = contents.get("extra_layers", contents.get("extra-layers"))
+
+        if extra_layers_data != None:
+            if type(extra_layers_data) == "list":
+                resolved_layers = []
+                for item in extra_layers_data:
+                    if type(item) == "dict":
+                        layer_target = item.get("layer")
+                        if not layer_target:
+                            fail("extra_layers entry in %s must contain a 'layer' key" % (ctx.rel or "."))
+                        entry = {"layer": _resolve_file_label(ctx.rel, str(layer_target))}
+                        item_arch = item.get("arch")
+                        if item_arch and str(item_arch).lower() != "noarch":
+                            entry["arch"] = _normalize_arch(str(item_arch))
+                        resolved_layers.append(entry)
+                    elif type(item) == "string":
+                        resolved_layers.append({"layer": _resolve_file_label(ctx.rel, item)})
+                    else:
+                        fail("extra_layers entries must be dicts with 'layer' and optional 'arch' in %s" % (ctx.rel or "."))
+                if resolved_layers:
+                    attrs["extra_layers"] = resolved_layers
+            else:
+                fail("extra_layers must be a list of layer entries in %s" % (ctx.rel or "."))
 
         # Lockfile check
         has_lock = False

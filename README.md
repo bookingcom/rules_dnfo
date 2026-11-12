@@ -432,6 +432,37 @@ exclude_licenses: false
 
 ---
 
+## Injecting rules_img Layers (`extra_layers:`)
+
+You can inject arbitrary `rules_img` container layers (`image_layer`, `layer_from_tar`, `layer_from_binary`, etc.) directly into your image to sit on top of the packages, base image, and files.
+
+`extra_layers` is a list of entries, where each entry specifies a `layer:` target and an optional `arch:`:
+
+```yaml
+contents:
+  repositories:
+    - id: baseos
+      name: BaseOS
+      baseurl: https://yum.oracle.com/repo/OracleLinux/OL10/baseos/latest/$basearch/
+      gpgcheck: 1
+      gpgkey: https://yum.oracle.com/RPM-GPG-KEY-oracle-ol10
+  packages:
+    - bash
+    - curl
+  extra_layers:
+    - arch: arm64
+      layer: :some-layer-arm
+    - arch: amd64
+      layer: //layers:some-layer-amd
+    - layer: :some-layer-shared
+```
+
+- **Architecture Filter**: If `arch:` is omitted (or not specified in the entry), the layer is applied across all target architectures. If `arch:` is specified (e.g. `arm64`, `amd64`), it is only applied to that architecture.
+- **Ordering**: The layers are appended in the exact order specified in the `extra_layers` list.
+- **Gazelle Resolution**: Relative target labels like `:some-layer-shared` or `//layers:some-layer-amd` are resolved and preserved in the generated `extra_layers = ...` attribute on `dnfo_image`.
+
+---
+
 ## License
 
 Apache License 2.0.
