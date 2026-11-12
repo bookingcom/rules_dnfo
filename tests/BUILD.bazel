@@ -1,0 +1,22 @@
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_test")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+package(default_visibility = ["//visibility:public"])
+
+py_binary(
+    name = "compare_image_structure_bin",
+    srcs = ["compare_image_structure.py"],
+    main = "compare_image_structure.py",
+)
+
+py_test(
+    name = "compare_image_structure_test",
+    srcs = ["compare_image_structure_test.py"],
+    deps = [":compare_image_structure_bin"],
+)
+
+bzl_library(
+    name = "image_structure",
+    srcs = ["image_structure.bzl"],
+    deps = ["@rules_img//img:providers"],
+)

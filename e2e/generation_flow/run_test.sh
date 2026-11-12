@@ -36,12 +36,12 @@ local_path_override(
     path = "${REPO_ROOT}",
 )
 
-bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.7")
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.8")
 archive_override(
     module_name = "dnf5-prebuilt",
-    integrity = "sha256-VsPvx5ZNZIyB6u2qJ06lfcL3OBCpGQjZCEzEZLR6qfQ=",
-    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.7",
-    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.7/dnf5-prebuilt-v5.4.6.0.bcr.7.tar.gz"],
+    integrity = "sha256-toq3TX00tgmTcw+mGsnZ7opbxpppF+zR59ox8X8qrdE=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.8",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.8/dnf5-prebuilt-v5.4.6.0.bcr.8.tar.gz"],
 )
 
 bazel_dep(name = "rules_containers_util", version = "0.0.5")
@@ -624,6 +624,7 @@ contents:
       gpgcheck: 0
   packages:
     - bash
+    - curl
 EOF
 
 # 1. Run gazelle to generate skeleton with normalized archs and user
@@ -957,13 +958,17 @@ EOF
 (cd test_extra && dgoss run --entrypoint /bin/sleep test_extra:latest 10)
 echo "Phase 12a verified: extra_layers image built and validated with Goss."
 
-# 12b: Test flatten-all-layers: true
+# 12b: Test flatten-all-layers: true on x86_64 and aarch64
 mkdir -p test_flatten_all
 cat > test_flatten_all/dnfo.yaml <<EOF
 flatten-all-layers: true
+archs:
+  - amd64
+  - arm64
 contents:
   packages:
     - bash
+    - curl
 EOF
 
 echo "flatten all extra 1 payload" > test_flatten_all/extra1.txt
@@ -971,6 +976,7 @@ echo "flatten all extra 2 payload" > test_flatten_all/extra2.txt
 
 cat > test_flatten_all/BUILD.bazel <<EOF
 load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
+load("@rules_dnfo//tests:image_structure.bzl", "image_structure_test")
 load("@rules_img//img:layer.bzl", "image_layer")
 
 image_layer(
@@ -989,36 +995,59 @@ image_layer(
 
 dnfo_image(
     name = "flatten_all_image",
+    archs = [
+        "x86_64",
+        "aarch64",
+    ],
     config = "dnfo.yaml",
-    contents = "@testimage_packages//:rpms",
-    packages = ["bash"],
+    contents = {
+        "aarch64": "@test_multiarch_aarch64_packages//:rpms",
+        "x86_64": "@test_multiarch_x86_64_packages//:rpms",
+    },
     extra_layers = [
         {"layer": ":extra_layer_1"},
         {"layer": ":extra_layer_2"},
     ],
     flatten_all_layers = True,
     lock_only = False,
+    packages = [
+        "bash",
+        "curl",
+    ],
+)
+
+image_structure_test(
+    name = "flatten_all_image_structure_test",
+    flattened = ":flatten_all_image",
+    unflattened = ":flatten_all_image_unflattened",
 )
 EOF
 
-INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_flatten_all:flatten_all_image
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_flatten_all:all
 
 EXEC_ROOT=$(INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2 && bazel info --invocation_id="${INVOCATION_ID}" execution_root)
-INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2
-FLATTEN_ALL_REL=$(bazel cquery --invocation_id="${INVOCATION_ID}" //test_flatten_all:flatten_all_image --output=files | grep '_manifest\.json' | head -n1)
-FLATTEN_ALL_MANIFEST="${EXEC_ROOT}/${FLATTEN_ALL_REL}"
-LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${FLATTEN_ALL_MANIFEST}')); print(len(m.get('layers', [])))")
 
-if [[ "${LAYER_COUNT}" -ne 1 ]]; then
-  echo "ERROR: Phase 12b failed: expected exactly 1 layer with flatten_all_layers=True, got ${LAYER_COUNT}" >&2
-  exit 1
-fi
-echo "Phase 12b verified: flatten_all_layers produced a manifest with exactly 1 flattened layer."
+for arch in x86_64 aarch64; do
+  INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2
+  FLATTEN_ALL_REL=$(bazel cquery --invocation_id="${INVOCATION_ID}" "//test_flatten_all:flatten_all_image_${arch}" --output=files | grep '_manifest\.json' | head -n1)
+  FLATTEN_ALL_MANIFEST="${EXEC_ROOT}/${FLATTEN_ALL_REL}"
+  LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${FLATTEN_ALL_MANIFEST}')); print(len(m.get('layers', [])))")
+  if [[ "${LAYER_COUNT}" -ne 1 ]]; then
+    echo "ERROR: Phase 12b failed: expected exactly 1 layer with flatten_all_layers=True on ${arch}, got ${LAYER_COUNT}" >&2
+    exit 1
+  fi
+done
+echo "Phase 12b verified: flatten_all_layers produced manifests with exactly 1 flattened layer on both x86_64 and aarch64."
 
 INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_flatten_all:flatten_all_image_load
 
 cat > test_flatten_all/goss.yaml <<EOF
+command:
+  curl --version:
+    exit-status: 0
 file:
+  /usr/lib64/libgcc_s.so.1:
+    exists: true
   /usr/share/extra1.txt:
     exists: true
     contents:
@@ -1033,13 +1062,17 @@ file:
 EOF
 
 (cd test_flatten_all && dgoss run --entrypoint /bin/sleep flatten_all_image:latest 10)
-echo "Phase 12b verified: flatten_all_layers image built and validated with Goss."
+echo "Phase 12b verified: flatten_all_layers image built and validated with Goss (curl and libgcc_s.so.1 verified)."
 
-# 12c: Test flatten-dnfo-layers: true with base image
+# 12c: Test flatten-dnfo-layers: true with base image on x86_64 and aarch64
 mkdir -p test_flatten_dnfo
 cat > test_flatten_dnfo/dnfo.yaml <<EOF
-base: "//testimage:testimage"
+base: "//test_multiarch:test_multiarch"
+user: root
 flatten-dnfo-layers: true
+archs:
+  - amd64
+  - arm64
 contents:
   packages:
     - curl
@@ -1048,9 +1081,10 @@ EOF
 echo "dnfo extra layer payload" > test_flatten_dnfo/dnfo_extra.txt
 echo "my dnfo file payload" > test_flatten_dnfo/my_dnfo_file.txt
 
-# Build a layered image on top of testimage:testimage with extra layer + files
+# Build a layered image on top of test_multiarch:test_multiarch with extra layer + files
 cat > test_flatten_dnfo/BUILD.bazel <<EOF
 load("@rules_dnfo//dnfo:defs.bzl", "dnfo_image")
+load("@rules_dnfo//tests:image_structure.bzl", "image_structure_test")
 load("@rules_img//img:layer.bzl", "image_layer")
 
 image_layer(
@@ -1062,10 +1096,16 @@ image_layer(
 
 dnfo_image(
     name = "flatten_dnfo_image",
-    base = "//testimage:testimage",
+    archs = [
+        "x86_64",
+        "aarch64",
+    ],
+    base = "//test_multiarch:test_multiarch",
     config = "dnfo.yaml",
-    contents = "@testimage_packages//:rpms",
-    packages = ["curl"],
+    contents = {
+        "aarch64": "@test_multiarch_aarch64_packages//:rpms",
+        "x86_64": "@test_multiarch_x86_64_packages//:rpms",
+    },
     extra_layers = [
         {"layer": ":dnfo_extra_layer"},
     ],
@@ -1074,29 +1114,45 @@ dnfo_image(
     },
     flatten_dnfo_layers = True,
     lock_only = False,
+    packages = ["curl"],
+    user = "root",
+)
+
+image_structure_test(
+    name = "flatten_dnfo_image_structure_test",
+    flattened = ":flatten_dnfo_image",
+    unflattened = ":flatten_dnfo_image_unflattened",
 )
 EOF
 
-INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //testimage:testimage //test_flatten_dnfo:flatten_dnfo_image
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel build --invocation_id="${INVOCATION_ID}" //test_multiarch:all //test_flatten_dnfo:all
 
-BASE_REL=$(INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2 && bazel cquery --invocation_id="${INVOCATION_ID}" //testimage:testimage --output=files | grep '_manifest\.json' | head -n1)
-BASE_MANIFEST="${EXEC_ROOT}/${BASE_REL}"
-BASE_LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${BASE_MANIFEST}')); print(len(m.get('layers', [])))")
-CHILD_REL=$(INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2 && bazel cquery --invocation_id="${INVOCATION_ID}" //test_flatten_dnfo:flatten_dnfo_image --output=files | grep '_manifest\.json' | head -n1)
-CHILD_MANIFEST="${EXEC_ROOT}/${CHILD_REL}"
-CHILD_LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${CHILD_MANIFEST}')); print(len(m.get('layers', [])))")
+for arch in x86_64 aarch64; do
+  INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" >&2
+  BASE_REL=$(bazel cquery --invocation_id="${INVOCATION_ID}" "//test_multiarch:test_multiarch_${arch}" --output=files | grep '_manifest\.json' | head -n1)
+  BASE_MANIFEST="${EXEC_ROOT}/${BASE_REL}"
+  BASE_LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${BASE_MANIFEST}')); print(len(m.get('layers', [])))")
+  CHILD_REL=$(bazel cquery --invocation_id="${INVOCATION_ID}" "//test_flatten_dnfo:flatten_dnfo_image_${arch}" --output=files | grep '_manifest\.json' | head -n1)
+  CHILD_MANIFEST="${EXEC_ROOT}/${CHILD_REL}"
+  CHILD_LAYER_COUNT=$(python3 -c "import json; m = json.load(open('${CHILD_MANIFEST}')); print(len(m.get('layers', [])))")
 
-EXPECTED_CHILD_LAYERS=$((BASE_LAYER_COUNT + 1))
-if [[ "${CHILD_LAYER_COUNT}" -ne "${EXPECTED_CHILD_LAYERS}" ]]; then
-  echo "ERROR: Phase 12c failed: expected ${EXPECTED_CHILD_LAYERS} layers (base ${BASE_LAYER_COUNT} + 1 flattened dnfo layer), got ${CHILD_LAYER_COUNT}" >&2
-  exit 1
-fi
-echo "Phase 12c verified: flatten_dnfo_layers squashed all dnfo layers into 1 layer on top of base image (${BASE_LAYER_COUNT} base + 1 dnfo = ${CHILD_LAYER_COUNT} total)."
+  EXPECTED_CHILD_LAYERS=$((BASE_LAYER_COUNT + 1))
+  if [[ "${CHILD_LAYER_COUNT}" -ne "${EXPECTED_CHILD_LAYERS}" ]]; then
+    echo "ERROR: Phase 12c failed: expected ${EXPECTED_CHILD_LAYERS} layers for ${arch} (base ${BASE_LAYER_COUNT} + 1 flattened dnfo layer), got ${CHILD_LAYER_COUNT}" >&2
+    exit 1
+  fi
+done
+echo "Phase 12c verified: flatten_dnfo_layers squashed all dnfo layers into 1 layer on top of base image on both x86_64 and aarch64."
 
 INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel run --invocation_id="${INVOCATION_ID}" //test_flatten_dnfo:flatten_dnfo_image_load
 
 cat > test_flatten_dnfo/goss.yaml <<EOF
+command:
+  curl --version:
+    exit-status: 0
 file:
+  /usr/lib64/libgcc_s.so.1:
+    exists: true
   /usr/share/dnfo_extra.txt:
     exists: true
     contents:
@@ -1114,8 +1170,15 @@ file:
 EOF
 
 (cd test_flatten_dnfo && dgoss run --entrypoint /bin/sleep flatten_dnfo_image:latest 10)
-echo "Phase 12c verified: flatten_dnfo_layers image built and validated with Goss."
+echo "Phase 12c verified: flatten_dnfo_layers image built and validated with Goss (curl and libgcc_s.so.1 verified)."
 
-echo "Phase 12 verified: extra_layers injection and layer flattening options validated successfully with Goss."
+# 12d: Structural test comparing flattened vs unflattened filesystems on x86_64 and aarch64
+INVOCATION_ID=$(uuidgen) && echo "Invocation ID: ${INVOCATION_ID}" && bazel test --invocation_id="${INVOCATION_ID}" \
+  //test_flatten_all:flatten_all_image_structure_test \
+  //test_flatten_dnfo:flatten_dnfo_image_structure_test
+
+echo "Phase 12d verified: structural filesystem comparison passed for both flatten-all-layers and flatten-dnfo-layers on x86_64 and aarch64."
+
+echo "Phase 12 verified: extra_layers injection and layer flattening options validated successfully with Goss and structural testing."
 
 echo "=== rules_dnfo 3-Phase E2E Flow Test PASSED successfully! ==="
