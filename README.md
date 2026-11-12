@@ -463,6 +463,26 @@ contents:
 
 ---
 
+## Layer Flattening Options (`flatten-all-layers:`, `flatten-dnfo-layers:`)
+
+By default, `rules_dnfo` preserves separate OCI layers for base images, packages, certificates, user files, and extra layers for fine-grained cache sharing.
+
+You can configure layer flattening to squash layers before generating the final image manifest:
+
+```yaml
+# Squashes ALL layers into a single layer per platform, including any base image layers:
+flatten-all-layers: true # defaults to false
+
+# Squashes all layers defined or mentioned in this dnfo specification (packages, files, extra layers)
+# into a single layer placed on top of the base image:
+flatten-dnfo-layers: false # defaults to false
+```
+
+- **`flatten-all-layers: true`**: All layers across the entire image (including any parent base image) are squashed into a single layer using `rules_img`'s `image_flatten` while preserving entrypoints, environment, accounts, and labels.
+- **`flatten-dnfo-layers: true`**: When layered on top of a `base` image, only the layers introduced by this `dnfo` configuration are squashed into a single layer on top of the base image layers. If no base image is specified, all dnfo layers are squashed into a single layer.
+
+---
+
 ## License
 
 Apache License 2.0.

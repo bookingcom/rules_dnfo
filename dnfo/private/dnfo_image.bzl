@@ -12,12 +12,133 @@ load(
     "passwd_entry",
     "trust_store",
 )
+load("@rules_img//img:convert.bzl", "image_flatten")
 load("@rules_img//img:image.bzl", "image_index", "image_manifest")
 load("@rules_img//img:layer.bzl", "image_layer", "layer_from_tar")
 load("@rules_img//img:load.bzl", "image_load")
+load("@rules_img//img:providers.bzl", "ImageManifestInfo", "LayersInfo")
 load("@rules_containers_util//containers:defs.bzl", "image_extract")
 load("@rules_multirun//:defs.bzl", "multirun")
 load("//dnfo/private:p11_kit_extract.bzl", "p11_kit_extract")
+
+def _dnfo_image_to_layer_impl(ctx):
+    manifest_info = ctx.attr.image[ImageManifestInfo]
+    return [
+        LayersInfo(layers = manifest_info.layers),
+        DefaultInfo(files = depset([l.blob for l in manifest_info.layers if l.blob != None])),
+    ]
+
+_dnfo_image_to_layer = rule(
+    implementation = _dnfo_image_to_layer_impl,
+    attrs = {
+        "image": attr.label(
+            mandatory = True,
+            providers = [ImageManifestInfo],
+            doc = "Image manifest target whose layers are extracted into LayersInfo.",
+        ),
+    },
+    doc = "Converts an ImageManifestInfo target into LayersInfo for use as layers in image_manifest.",
+)
+
+def _create_image_manifest(
+        target_name,
+        layers,
+        base = None,
+        flatten_all_layers = False,
+        flatten_dnfo_layers = False,
+        entrypoint = None,
+        cmd = None,
+        working_dir = None,
+        env = None,
+        platform = None,
+        user = None,
+        stop_signal = None,
+        labels = None,
+        annotations = None,
+        visibility = ["//visibility:public"]):
+    """Helper to assemble an image manifest with optional layer flattening.
+
+    Handles full layer flattening (flatten_all_layers) and dnfo-only layer flattening
+    (flatten_dnfo_layers) on top of an optional base image.
+    """
+    manifest_kwargs = {}
+    if platform:
+        manifest_kwargs["platform"] = platform
+    if user != None:
+        manifest_kwargs["user"] = str(user)
+    if stop_signal != None:
+        manifest_kwargs["stop_signal"] = stop_signal
+    if labels:
+        manifest_kwargs["labels"] = labels
+    if annotations:
+        manifest_kwargs["annotations"] = annotations
+
+    if flatten_all_layers or (flatten_dnfo_layers and not base):
+        if base:
+            manifest_kwargs["base"] = base
+        image_manifest(
+            name = target_name + "_unflattened",
+            layers = layers,
+            entrypoint = entrypoint,
+            cmd = cmd,
+            working_dir = working_dir,
+            env = env,
+            visibility = ["//visibility:private"],
+            **manifest_kwargs
+        )
+        image_flatten(
+            name = target_name,
+            image = ":" + target_name + "_unflattened",
+            visibility = visibility,
+        )
+    elif flatten_dnfo_layers and base:
+        final_layers = layers
+        if len(layers) > 1:
+            intermediate_kwargs = {}
+            if platform:
+                intermediate_kwargs["platform"] = platform
+            image_manifest(
+                name = target_name + "_dnfo_unflattened",
+                layers = layers,
+                visibility = ["//visibility:private"],
+                **intermediate_kwargs
+            )
+            image_flatten(
+                name = target_name + "_dnfo_flattened",
+                image = ":" + target_name + "_dnfo_unflattened",
+                visibility = ["//visibility:private"],
+            )
+            _dnfo_image_to_layer(
+                name = target_name + "_dnfo_layer",
+                image = ":" + target_name + "_dnfo_flattened",
+                visibility = ["//visibility:private"],
+            )
+            final_layers = [":" + target_name + "_dnfo_layer"]
+
+        manifest_kwargs["base"] = base
+        image_manifest(
+            name = target_name,
+            layers = final_layers,
+            entrypoint = entrypoint,
+            cmd = cmd,
+            working_dir = working_dir,
+            env = env,
+            visibility = visibility,
+            **manifest_kwargs
+        )
+    else:
+        if base:
+            manifest_kwargs["base"] = base
+        image_manifest(
+            name = target_name,
+            layers = layers,
+            entrypoint = entrypoint,
+            cmd = cmd,
+            working_dir = working_dir,
+            env = env,
+            visibility = visibility,
+            **manifest_kwargs
+        )
 
 def _process_certificates(name, certificates, packages, user_file_paths):
     """Processes certificates attribute configuration.
@@ -355,6 +476,8 @@ def dnfo_image(
         locale = None,
         certificates = None,
         extra_layers = None,
+        flatten_all_layers = False,
+        flatten_dnfo_layers = False,
         **kwargs):
     """Builds an OCI container image or multi-arch image index from RPM packages declared in dnfo YAML.
 
@@ -410,6 +533,8 @@ def dnfo_image(
       locale: Optional locale alias for install_langs; also sets default LANG in image manifest.
       certificates: Optional SSL/TLS CA certificate configuration.
       extra_layers: Optional list of dicts with 'layer' and optional 'arch' to inject into the image.
+      flatten_all_layers: Whether to squash all layers (including base image) into a single layer.
+      flatten_dnfo_layers: Whether to squash layers defined in this dnfo target into a single layer on top of base image.
       **kwargs: Additional arguments forwarded to rules_img.
     """
     visibility = kwargs.get("visibility", ["//visibility:public"])
@@ -906,31 +1031,25 @@ def dnfo_image(
             if arch_extra:
                 arch_layers.extend(arch_extra)
 
-            arch_manifest_kwargs = {}
-            if base:
-                arch_manifest_kwargs["base"] = base
-            if arch_target_platform:
-                arch_manifest_kwargs["platform"] = arch_target_platform
-            if user != None:
-                arch_manifest_kwargs["user"] = str(user)
-            if stop_signal != None:
-                arch_manifest_kwargs["stop_signal"] = stop_signal
-            if labels:
-                arch_manifest_kwargs["labels"] = labels
-            if annotations:
-                arch_manifest_kwargs["annotations"] = annotations
-
-            image_manifest(
-                name = name + "_" + a,
+            target_name = name + "_" + a
+            _create_image_manifest(
+                target_name = target_name,
                 layers = arch_layers,
+                base = base,
+                flatten_all_layers = flatten_all_layers,
+                flatten_dnfo_layers = flatten_dnfo_layers,
                 entrypoint = ep,
                 cmd = c,
                 working_dir = wd,
                 env = merged_env,
+                platform = arch_target_platform,
+                user = user,
+                stop_signal = stop_signal,
+                labels = labels,
+                annotations = annotations,
                 visibility = visibility,
-                **arch_manifest_kwargs
             )
-            manifest_labels.append(":" + name + "_" + a)
+            manifest_labels.append(":" + target_name)
 
         # Multi-platform image index
         index_kwargs = {}
@@ -995,29 +1114,22 @@ def dnfo_image(
     if single_extra:
         layers.extend(single_extra)
 
-    manifest_kwargs = {}
-    if target_platform:
-        manifest_kwargs["platform"] = target_platform
-    if base:
-        manifest_kwargs["base"] = base
-    if user != None:
-        manifest_kwargs["user"] = str(user)
-    if stop_signal != None:
-        manifest_kwargs["stop_signal"] = stop_signal
-    if labels:
-        manifest_kwargs["labels"] = labels
-    if annotations:
-        manifest_kwargs["annotations"] = annotations
-
-    image_manifest(
-        name = name,
+    _create_image_manifest(
+        target_name = name,
         layers = layers,
+        base = base,
+        flatten_all_layers = flatten_all_layers,
+        flatten_dnfo_layers = flatten_dnfo_layers,
         entrypoint = ep,
         cmd = c,
         working_dir = wd,
         env = merged_env,
+        platform = target_platform,
+        user = user,
+        stop_signal = stop_signal,
+        labels = labels,
+        annotations = annotations,
         visibility = visibility,
-        **manifest_kwargs
     )
 
     load_tag = tag if tag else (name + ":latest")
