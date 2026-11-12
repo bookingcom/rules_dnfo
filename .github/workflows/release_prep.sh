@@ -49,12 +49,12 @@ archive_override(
 > Until \`dnf5-prebuilt\` and \`rules_containers_util\` are published to BCR, you must configure their overrides in your \`MODULE.bazel\`:
 >
 > \`\`\`starlark
-> bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.7")
+> bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.8")
 > archive_override(
 >     module_name = "dnf5-prebuilt",
->     integrity = "sha256-VsPvx5ZNZIyB6u2qJ06lfcL3OBCpGQjZCEzEZLR6qfQ=",
->     strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.7",
->     urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.7/dnf5-prebuilt-v5.4.6.0.bcr.7.tar.gz"],
+>     integrity = "sha256-toq3TX00tgmTcw+mGsnZ7opbxpppF+zR59ox8X8qrdE=",
+>     strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.8",
+>     urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.8/dnf5-prebuilt-v5.4.6.0.bcr.8.tar.gz"],
 > )
 >
 > bazel_dep(name = "rules_containers_util", version = "0.0.5")

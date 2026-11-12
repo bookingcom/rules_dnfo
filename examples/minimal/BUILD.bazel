@@ -46,3 +46,44 @@ dnfo_image(
     user = "nonroot",
     workdir = "/home",
 )
+
+dnfo_image(
+    name = "minimal_flatten_all",
+    archs = [
+        "x86_64",
+        "aarch64",
+    ],
+    config = "dnfo.yaml",
+    contents = {
+        "aarch64": "@minimal_aarch64_packages//:rpms",
+        "x86_64": "@minimal_x86_64_packages//:rpms",
+    },
+    flatten_all_layers = True,
+    lock_only = False,
+    packages = [
+        "bash",
+        "coreutils",
+    ],
+)
+
+dnfo_image(
+    name = "minimal_flatten_dnfo",
+    archs = [
+        "x86_64",
+        "aarch64",
+    ],
+    base = ":minimal",
+    config = "dnfo.yaml",
+    contents = {
+        "aarch64": "@minimal_aarch64_packages//:rpms",
+        "x86_64": "@minimal_x86_64_packages//:rpms",
+    },
+    files = {
+        "/etc/test_config.txt": ":BUILD.bazel",
+    },
+    flatten_dnfo_layers = True,
+    lock_only = False,
+    packages = [
+        "bash",
+    ],
+)

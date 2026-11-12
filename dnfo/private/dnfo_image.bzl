@@ -3,6 +3,7 @@
 load("@bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@bazel_lib//lib:write_source_files.bzl", "write_source_file")
 load("@dnf5-prebuilt//dnf5-prebuilt:defs.bzl", "dnf_config", "rpm_extract", "rpm_layer", "rpm_lock", "rpm_mark")
+load("@rules_containers_util//containers:defs.bzl", "image_extract")
 load(
     "@rules_img//img:base_images.bzl",
     "base_image_layer",
@@ -17,7 +18,6 @@ load("@rules_img//img:image.bzl", "image_index", "image_manifest")
 load("@rules_img//img:layer.bzl", "image_layer", "layer_from_tar")
 load("@rules_img//img:load.bzl", "image_load")
 load("@rules_img//img:providers.bzl", "ImageManifestInfo", "LayersInfo")
-load("@rules_containers_util//containers:defs.bzl", "image_extract")
 load("@rules_multirun//:defs.bzl", "multirun")
 load("//dnfo/private:p11_kit_extract.bzl", "p11_kit_extract")
 
@@ -83,7 +83,8 @@ def _create_image_manifest(
             cmd = cmd,
             working_dir = working_dir,
             env = env,
-            visibility = ["//visibility:private"],
+            visibility = visibility,
+            tags = ["manual"],
             **manifest_kwargs
         )
         image_flatten(
@@ -115,6 +116,18 @@ def _create_image_manifest(
             )
             final_layers = [":" + target_name + "_dnfo_layer"]
 
+        image_manifest(
+            name = target_name + "_unflattened",
+            layers = layers,
+            base = base,
+            entrypoint = entrypoint,
+            cmd = cmd,
+            working_dir = working_dir,
+            env = env,
+            visibility = visibility,
+            tags = ["manual"],
+            **manifest_kwargs
+        )
         manifest_kwargs["base"] = base
         image_manifest(
             name = target_name,
@@ -1062,6 +1075,15 @@ def dnfo_image(
             visibility = visibility,
             **index_kwargs
         )
+
+        if flatten_all_layers or flatten_dnfo_layers:
+            image_index(
+                name = name + "_unflattened",
+                manifests = [":" + name + "_" + a + "_unflattened" for a in resolved_archs],
+                visibility = visibility,
+                tags = ["manual"],
+                **index_kwargs
+            )
 
         load_tag = tag if tag else (name + ":latest")
         image_load(

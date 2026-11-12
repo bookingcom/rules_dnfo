@@ -64,6 +64,9 @@ Whenever invoking `bazel` (`build`, `test`, `run`, `cquery`, `query`, etc.):
   bazel run //:gazelle
   bazel run //:gazelle.check
   ```
+- **Package Layout & Visibility**:
+  - Only the public ruleset API and its direct runtime dependencies belong under `/dnfo`.
+  - Internal tests, test-only macros, test rules, or verification utilities belong under `/tests` or `/e2e`, never in `/dnfo`.
 - **Remote Cache & Credentials**:
   - Do not delete, commit, or overwrite `.bazelrc.user`. It is git-ignored and contains remote execution credentials.
 - **Submodule Isolation**:
