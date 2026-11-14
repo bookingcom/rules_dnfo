@@ -1,0 +1,38 @@
+# Regenerate with `bazel run -- //hooks:config`. Do not edit
+minimum_pre_commit_version: 2.18.0
+default_install_hook_types:
+  - pre-commit
+repos:
+  - repo: local
+    hooks:
+      - id: //hooks:buildifier
+        name: Format Bazel files
+        description: Format and check Bazel/Starlark files with buildifier
+        language: system
+        require_serial: true
+        stages:
+          - pre-commit
+        entry: bazel run --config=pre-commit -- //hooks:buildifier
+        types_or:
+          - bazel
+      - id: //hooks:gazelle
+        name: Manage Starlark files with Gazelle
+        description: Update and check Starlark files with Gazelle
+        language: system
+        require_serial: true
+        stages:
+          - pre-commit
+        entry: bazel run --config=pre-commit -- //hooks:gazelle
+        pass_filenames: false
+        types_or:
+          - bazel
+      - id: //hooks:config
+        name: Update `pre-commit` config
+        description: Keeps the `.pre-commit-config.yaml` in sync with any changes to the `pre_commit_config` rule.
+        language: system
+        require_serial: true
+        stages:
+          - pre-commit
+        entry: bazel run --config=pre-commit -- //hooks:config
+        pass_filenames: false
+        files: ^(MODULE\.bazel\.lock|hooks/BUILD(\.bazel)?)$

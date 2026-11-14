@@ -4,6 +4,11 @@ common:ci --show_progress_rate_limit=5
 test:ci --test_output=errors
 test:ci --test_summary=terse
 
+# Disable Bazel output for `pre-commit` hooks
+common:pre-commit --ui_event_filters=-info,-stdout,-stderr
+common:pre-commit --noshow_progress
+common:pre-commit --lockfile_mode=off
+
 # BuildBuddy remote cache / execution settings
 common:buildbuddy --remote_timeout=3600
 common:buildbuddy --noexperimental_remote_cache_chunking

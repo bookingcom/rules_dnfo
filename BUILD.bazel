@@ -1,8 +1,36 @@
 load("@aspect_gazelle_prebuilt//:def.bzl", "aspect_gazelle")
+load("@buildifier_prebuilt//:rules.bzl", "buildifier", "buildifier_test")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["LICENSE"])
+exports_files([
+    "LICENSE",
+    "REPO.bazel",
+])
+
+buildifier(
+    name = "buildifier",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+)
+
+buildifier(
+    name = "buildifier.check",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    mode = "diff",
+)
+
+buildifier_test(
+    name = "buildifier_test",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    no_sandbox = True,
+    workspace = "//:REPO.bazel",
+)
 
 # Internal repo gazelle target: manages Starlark files within the rules_dnfo repository.
 aspect_gazelle(
