@@ -3,5 +3,6 @@ bazel-*
 .untether-outbox
 .bazelrc.user
 dist/
+artifacts/
 __pycache__/
 *.pyc

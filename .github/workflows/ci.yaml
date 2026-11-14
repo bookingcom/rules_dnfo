@@ -45,3 +45,11 @@ jobs:
         run: bazel --bazelrc=.github/workflows/ci.bazelrc run //:buildifier.check
       - name: Run E2E 3-phase flow test
         run: ./e2e/generation_flow/run_test.sh
+      - name: Run E2E SBOM test
+        run: ./e2e/sbom/run_test.sh
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        if: always()
+        with:
+          name: sbom-artifacts
+          path: artifacts/sbom/

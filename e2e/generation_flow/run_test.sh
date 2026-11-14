@@ -36,12 +36,26 @@ local_path_override(
     path = "${REPO_ROOT}",
 )
 
-bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.8")
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.9")
 archive_override(
     module_name = "dnf5-prebuilt",
-    integrity = "sha256-toq3TX00tgmTcw+mGsnZ7opbxpppF+zR59ox8X8qrdE=",
-    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.8",
-    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.8/dnf5-prebuilt-v5.4.6.0.bcr.8.tar.gz"],
+    integrity = "sha256-7hKAFCj7ORn5LTY2MIJtawX0E0Ky/ue3cHAuaaYhsS4=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.9",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.9/dnf5-prebuilt-v5.4.6.0.bcr.9.tar.gz"],
+)
+
+archive_override(
+    module_name = "supply_chain_tools",
+    integrity = "sha256-YpP3ZodjRBBKIAgyOXhRMyGDIs4oqsC0MEC8VHn1pRM=",
+    strip_prefix = "supply_chain_tools-0.0.3/tools",
+    urls = ["https://github.com/bazel-contrib/supply-chain/releases/download/supply_chain_tools-0.0.3/supply_chain_tools-0.0.3.tar.gz"],
+)
+
+archive_override(
+    module_name = "supply-chain-go",
+    integrity = "sha256-iUcy/deO90HaWGFS4Zas+KctlULjXawYEPlqnWQK5s0=",
+    strip_prefix = "supply-chain-go-0.0.11/lib/supplychain-go",
+    urls = ["https://github.com/bazel-contrib/supply-chain/releases/download/supply-chain-go-0.0.11/supply-chain-go-0.0.11.tar.gz"],
 )
 
 bazel_dep(name = "rules_containers_util", version = "0.0.5")

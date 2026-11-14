@@ -67,7 +67,8 @@
       "version":"14.3.1-4.4.0.1.el10",
       "arch":"x86_64",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/libgcc-14.3.1-4.4.0.1.el10.x86_64.rpm",
-      "integrity":"sha256-Ait6CEllQP2FkTtT9o1JjhjXPY9MGe9yAZ\/LzxzzKek="
+      "integrity":"sha256-Ait6CEllQP2FkTtT9o1JjhjXPY9MGe9yAZ\/LzxzzKek=",
+      "post_install_script":true
     },
     {
       "name":"ncurses-base",
@@ -109,7 +110,9 @@
       "version":"20260216-1.git0e54016.el10_2.2",
       "arch":"noarch",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/crypto-policies-20260216-1.git0e54016.el10_2.2.noarch.rpm",
-      "integrity":"sha256-sNd5NXXuj+S3+a1eALs7tMSg7AY2StdZml3h7hpD9yk="
+      "integrity":"sha256-sNd5NXXuj+S3+a1eALs7tMSg7AY2StdZml3h7hpD9yk=",
+      "pre_install_script":true,
+      "post_install_script":true
     },
     {
       "name":"gmp",
@@ -187,6 +190,7 @@
       "arch":"x86_64",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/bash-5.2.26-6.el10.x86_64.rpm",
       "integrity":"sha256-RYhu1E9CU\/r+xaCPlFeZQ52P9ywIgs+yniNT9MDhDD4=",
+      "post_install_script":true,
       "requested":true
     },
     {
@@ -201,7 +205,8 @@
       "version":"2.14.5-7.el10",
       "arch":"noarch",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/setup-2.14.5-7.el10.noarch.rpm",
-      "integrity":"sha256-2rnfogGwiJM5TR4SoUd\/RbMgmWG78+mfchmjVGKBhsE="
+      "integrity":"sha256-2rnfogGwiJM5TR4SoUd\/RbMgmWG78+mfchmjVGKBhsE=",
+      "post_install_script":true
     },
     {
       "name":"glibc-common",
@@ -215,7 +220,9 @@
       "version":"2.39-145.0.1.el10_2",
       "arch":"x86_64",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/glibc-2.39-145.0.1.el10_2.x86_64.rpm",
-      "integrity":"sha256-vxDsqtJfixdUr\/Z\/+0iJ7ppZzFqmCklSrWtqaxJW3nM="
+      "integrity":"sha256-vxDsqtJfixdUr\/Z\/+0iJ7ppZzFqmCklSrWtqaxJW3nM=",
+      "pre_install_script":true,
+      "post_install_script":true
     },
     {
       "name":"glibc-minimal-langpack",
@@ -236,7 +243,8 @@
       "version":"0.26.4-1.el10_2",
       "arch":"x86_64",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/p11-kit-trust-0.26.4-1.el10_2.x86_64.rpm",
-      "integrity":"sha256-e7C2OkJbI5iCQTdjBqkIUc7Hhc+z+7JHCoT0Fu1VGxg="
+      "integrity":"sha256-e7C2OkJbI5iCQTdjBqkIUc7Hhc+z+7JHCoT0Fu1VGxg=",
+      "post_install_script":true
     },
     {
       "name":"pam-libs",
@@ -257,7 +265,8 @@
       "version":"10.44-1.5.0.1.el10_2",
       "arch":"x86_64",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/pcre2-10.44-1.5.0.1.el10_2.x86_64.rpm",
-      "integrity":"sha256-zeu9bPUqJAIqad\/+a6YetGZqtRfzXKaR1aiyiKnNhRg="
+      "integrity":"sha256-zeu9bPUqJAIqad\/+a6YetGZqtRfzXKaR1aiyiKnNhRg=",
+      "post_install_script":true
     },
     {
       "name":"grep",
@@ -299,7 +308,9 @@
       "version":"2026.2.92_v9.0.319-100.3.el10_2",
       "arch":"noarch",
       "url":"https:\/\/yum.oracle.com\/repo\/OracleLinux\/OL10\/baseos\/latest\/x86_64\/getPackage\/ca-certificates-2026.2.92_v9.0.319-100.3.el10_2.noarch.rpm",
-      "integrity":"sha256-nHTkRZBqpFbU5ok\/cWNO2wbqyTQjebsbBBhK3SWEmAs="
+      "integrity":"sha256-nHTkRZBqpFbU5ok\/cWNO2wbqyTQjebsbBBhK3SWEmAs=",
+      "pre_install_script":true,
+      "post_install_script":true
     },
     {
       "name":"coreutils",
