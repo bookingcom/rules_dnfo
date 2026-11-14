@@ -89,6 +89,7 @@ def _resolve_include_label(rel, inc):
     if inc.startswith("//") or inc.startswith(":"):
         if not inc.endswith(".yaml") and not inc.endswith(".yml"):
             return inc
+
     # If it's a repo-absolute file path (e.g. //pkg:parent.dnfo.yaml or //pkg/parent.dnfo.yaml)
     if inc.startswith("//"):
         if ":" in inc:
@@ -300,7 +301,7 @@ def _declare(ctx):
                     ("Base image '%s' in %s is invalid. " % (base, s.path)) +
                     "External base images must be pulled via rules_img in MODULE.bazel. " +
                     "Please pull the image in MODULE.bazel using rules_img (e.g. images.pull(name = \"%s\", ...)) " % base.split("/")[0] +
-                    "and reference it here using base: <image_name>."
+                    "and reference it here using base: <image_name>.",
                 )
             else:
                 attrs["base"] = "@" + base + "//:image"
@@ -309,11 +310,11 @@ def _declare(ctx):
                     "\n[gazelle-dnfo] External base image '%s' declared for %s:%s.\n" % (base, pkg_prefix, name) +
                     "Ensure it is pulled via rules_img in your MODULE.bazel:\n\n" +
                     'images = use_extension("@rules_img//img:extensions.bzl", "images")\n' +
-                    'images.pull(\n' +
+                    "images.pull(\n" +
                     '    name = "%s",\n' % base +
                     '    digest = "...",\n' +
                     '    repository = "...",\n' +
-                    ')\n' +
+                    ")\n" +
                     'use_repo(images, "%s")\n' % base,
                 )
 
@@ -545,7 +546,7 @@ def _declare(ctx):
                     lf = _lockfile_for(config_name, a)
                     repo_names.append('"%s"' % rname)
                     lock_lines.append(
-                        'dnfo.lock(\n    name = "%s",\n    lockfile = "%s:%s",\n)' % (rname, pkg_prefix, lf)
+                        'dnfo.lock(\n    name = "%s",\n    lockfile = "%s:%s",\n)' % (rname, pkg_prefix, lf),
                     )
                 if ctx.properties["dnfo_lock_hint"]:
                     print(
@@ -553,7 +554,7 @@ def _declare(ctx):
                         "Ensure the following is present in your MODULE.bazel:\n\n" +
                         'dnfo = use_extension("@rules_dnfo//dnfo:extensions.bzl", "dnfo")\n' +
                         "\n".join(lock_lines) + "\n" +
-                        ("use_repo(dnfo, %s)\n" % ", ".join(repo_names))
+                        ("use_repo(dnfo, %s)\n" % ", ".join(repo_names)),
                     )
             else:
                 lf = _lockfile_for(config_name)

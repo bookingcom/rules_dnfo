@@ -1,0 +1,31 @@
+load("@pre-commit//pre-commit:defs.bzl", "pre_commit")
+load("@pre-commit//pre-commit/hook:defs.bzl", "pre_commit_hook")
+
+package(default_visibility = ["//visibility:public"])
+
+pre_commit_hook(
+    name = "buildifier",
+    src = "@buildifier_prebuilt//:buildifier",
+    description = "Format and check Bazel/Starlark files with buildifier",
+    stages = ["@pre-commit//pre-commit/stage:pre-commit"],
+    summary = "Format Bazel files",
+    types_or = ["@pre-commit//pre-commit/tag:bazel"],
+)
+
+pre_commit_hook(
+    name = "gazelle",
+    src = "//:gazelle",
+    description = "Update and check Starlark files with Gazelle",
+    pass_filenames = False,
+    stages = ["@pre-commit//pre-commit/stage:pre-commit"],
+    summary = "Manage Starlark files with Gazelle",
+    types_or = ["@pre-commit//pre-commit/tag:bazel"],
+)
+
+pre_commit(
+    name = "hooks",
+    srcs = [
+        ":buildifier",
+        ":gazelle",
+    ],
+)

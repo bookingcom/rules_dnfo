@@ -14,6 +14,8 @@ bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.29")
 bazel_dep(name = "buildifier_prebuilt", version = "10.1.0")
 bazel_dep(name = "aspect_rules_py", version = "2.0.0-alpha.10")
 
+bazel_dep(name = "pre-commit", version = "1.0.13", dev_dependency = True)
+
 python = use_extension("@aspect_rules_py//py:extensions.bzl", "python_interpreters")
 python.toolchain(python_version = "3.14")
 use_repo(

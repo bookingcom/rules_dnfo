@@ -59,10 +59,16 @@ Whenever invoking `bazel` (`build`, `test`, `run`, `cquery`, `query`, etc.):
 
 - **No `genrule`**: Never use `genrule`. Use proper binary rules, Starlark rules, and helpers from `bazel_lib` or `tar.bzl`.
 - **Tooling**: Built in Go using `rules_go` and `gazelle`.
-- **Starlark Management**: Starlark (`.bzl` and `BUILD.bazel`) files are managed using `aspect_gazelle_prebuilt`. Always verify with:
+- **Starlark Management & Formatting**: Starlark (`.bzl`, `.star`, `BUILD.bazel`, `MODULE.bazel`) files are managed using `aspect_gazelle_prebuilt` and `buildifier_prebuilt`. Before each commit, ensure these sanitizers are executed:
   ```bash
+  bazel run //:buildifier
+  bazel test //:buildifier_test
   bazel run //:gazelle
   bazel run //:gazelle.check
+  ```
+  Or run the unified pre-commit checks:
+  ```bash
+  bazel run //hooks
   ```
 - **Package Layout & Visibility**:
   - Only the public ruleset API and its direct runtime dependencies belong under `/dnfo`.
