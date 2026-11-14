@@ -15,6 +15,18 @@ py_test(
     deps = [":compare_image_structure_bin"],
 )
 
+py_test(
+    name = "sbom_test",
+    srcs = ["sbom_test.py"],
+    data = [
+        "//examples/certificates:certificates_spdx",
+        "//examples/minimal:minimal_aarch64_spdx",
+        "//examples/minimal:minimal_cyclonedx",
+        "//examples/minimal:minimal_spdx",
+        "//examples/minimal:minimal_x86_64_spdx",
+    ],
+)
+
 bzl_library(
     name = "image_structure",
     srcs = ["image_structure.bzl"],

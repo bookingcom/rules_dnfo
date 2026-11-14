@@ -19,6 +19,9 @@ load("@rules_img//img:layer.bzl", "image_layer", "layer_from_tar")
 load("@rules_img//img:load.bzl", "image_load")
 load("@rules_img//img:providers.bzl", "ImageManifestInfo", "LayersInfo")
 load("@rules_multirun//:defs.bzl", "multirun")
+load("@supply_chain_tools//sbom:cyclonedx.bzl", "cyclonedx")
+load("@supply_chain_tools//sbom:sbom.bzl", "sbom")
+load("@supply_chain_tools//sbom:spdx.bzl", "spdx")
 load("//dnfo/private:p11_kit_extract.bzl", "p11_kit_extract")
 
 def _dnfo_image_to_layer_impl(ctx):
@@ -1064,6 +1067,25 @@ def dnfo_image(
             )
             manifest_labels.append(":" + target_name)
 
+            sbom(
+                name = target_name + "_sbom",
+                require_root_metadata = False,
+                target = ":" + target_name,
+                visibility = visibility,
+            )
+            spdx(
+                name = target_name + "_spdx",
+                format = "json",
+                sbom = ":" + target_name + "_sbom",
+                visibility = visibility,
+            )
+            cyclonedx(
+                name = target_name + "_cyclonedx",
+                format = "json",
+                sbom = ":" + target_name + "_sbom",
+                visibility = visibility,
+            )
+
         # Multi-platform image index
         index_kwargs = {}
         if annotations:
@@ -1074,6 +1096,25 @@ def dnfo_image(
             manifests = manifest_labels,
             visibility = visibility,
             **index_kwargs
+        )
+
+        sbom(
+            name = name + "_sbom",
+            require_root_metadata = False,
+            target = ":" + name,
+            visibility = visibility,
+        )
+        spdx(
+            name = name + "_spdx",
+            format = "json",
+            sbom = ":" + name + "_sbom",
+            visibility = visibility,
+        )
+        cyclonedx(
+            name = name + "_cyclonedx",
+            format = "json",
+            sbom = ":" + name + "_sbom",
+            visibility = visibility,
         )
 
         if flatten_all_layers or flatten_dnfo_layers:
@@ -1151,6 +1192,25 @@ def dnfo_image(
         stop_signal = stop_signal,
         labels = labels,
         annotations = annotations,
+        visibility = visibility,
+    )
+
+    sbom(
+        name = name + "_sbom",
+        require_root_metadata = False,
+        target = ":" + name,
+        visibility = visibility,
+    )
+    spdx(
+        name = name + "_spdx",
+        format = "json",
+        sbom = ":" + name + "_sbom",
+        visibility = visibility,
+    )
+    cyclonedx(
+        name = name + "_cyclonedx",
+        format = "json",
+        sbom = ":" + name + "_sbom",
         visibility = visibility,
     )
 

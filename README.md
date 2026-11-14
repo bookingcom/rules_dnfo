@@ -24,12 +24,26 @@ Add to your `MODULE.bazel`:
 bazel_dep(name = "rules_dnfo", version = "0.0.1")
 
 # dnf5-prebuilt dependency override (until published to BCR)
-bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.8")
+bazel_dep(name = "dnf5-prebuilt", version = "5.4.6.0.bcr.9")
 archive_override(
     module_name = "dnf5-prebuilt",
-    integrity = "sha256-toq3TX00tgmTcw+mGsnZ7opbxpppF+zR59ox8X8qrdE=",
-    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.8",
-    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.8/dnf5-prebuilt-v5.4.6.0.bcr.8.tar.gz"],
+    integrity = "sha256-7hKAFCj7ORn5LTY2MIJtawX0E0Ky/ue3cHAuaaYhsS4=",
+    strip_prefix = "dnf5-prebuilt-5.4.6.0.bcr.9",
+    urls = ["https://github.com/bookingcom/dnf5-prebuilt/releases/download/v5.4.6.0.bcr.9/dnf5-prebuilt-v5.4.6.0.bcr.9.tar.gz"],
+)
+
+# supply_chain_tools & supply-chain-go overrides (until published to BCR)
+archive_override(
+    module_name = "supply_chain_tools",
+    integrity = "sha256-YpP3ZodjRBBKIAgyOXhRMyGDIs4oqsC0MEC8VHn1pRM=",
+    strip_prefix = "supply_chain_tools-0.0.3/tools",
+    urls = ["https://github.com/bazel-contrib/supply-chain/releases/download/supply_chain_tools-0.0.3/supply_chain_tools-0.0.3.tar.gz"],
+)
+archive_override(
+    module_name = "supply-chain-go",
+    integrity = "sha256-iUcy/deO90HaWGFS4Zas+KctlULjXawYEPlqnWQK5s0=",
+    strip_prefix = "supply-chain-go-0.0.11/lib/supplychain-go",
+    urls = ["https://github.com/bazel-contrib/supply-chain/releases/download/supply-chain-go-0.0.11/supply-chain-go-0.0.11.tar.gz"],
 )
 ```
 
@@ -230,6 +244,17 @@ When `archs` has multiple architectures, `dnfo_image` generates:
 - `:image_<arch>`: Individual `image_manifest` targets for each architecture (e.g. `:image_x86_64`, `:image_aarch64`).
 - `:image_<arch>.tar`: OCI tarball for the specific architecture.
 - `:image_<arch>.load`: Local container engine loader for the specific architecture.
+- `:image_sbom`, `:image_spdx`, `:image_cyclonedx`: SBOM and SPDX/CycloneDX specification targets combining package metadata across all architectures.
+- `:image_<arch>_sbom`, `:image_<arch>_spdx`, `:image_<arch>_cyclonedx`: Per-architecture SBOM and SPDX/CycloneDX targets.
+
+For single-architecture configurations, `dnfo_image` generates `:image`, `:image.load`, `:image_sbom`, `:image_spdx`, and `:image_cyclonedx`.
+
+Build an image's SPDX or CycloneDX SBOM with:
+
+```bash
+bazel build //path/to:image_spdx
+bazel build //path/to:image_cyclonedx
+```
 
 ---
 
