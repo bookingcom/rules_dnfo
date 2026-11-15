@@ -74,6 +74,56 @@ dnfo_image(
     lock_only = False,
 )
 
+dnfo_image(
+    name = "test_oci_metadata_image",
+    archs = ["x86_64"],
+    env_file = ":test.env",
+    lock_only = False,
+    paths = [
+        {
+            "gid": 1000,
+            "mode": "0755",
+            "path": "/var/log/app",
+            "type": "directory",
+            "uid": 1000,
+        },
+        {
+            "gid": 0,
+            "mode": "0644",
+            "path": "/var/run/app.pid",
+            "type": "empty-file",
+            "uid": 0,
+        },
+        {
+            "path": "/etc/ssl/cert.pem",
+            "target": "/etc/pki/tls-ca-bundle.pem",
+            "type": "symlink",
+        },
+    ],
+    ports = [
+        "80/tcp",
+        "8080",
+    ],
+    volumes = [
+        "/var/log",
+        "/var/lib/data",
+    ],
+)
+
+dnfo_image(
+    name = "test_oci_child_paths_image",
+    archs = ["x86_64"],
+    base = ":test_oci_metadata_image",
+    lock_only = False,
+    paths = [
+        {
+            "mode": "0700",
+            "path": "/opt/custom",
+            "type": "directory",
+        },
+    ],
+)
+
 py_binary(
     name = "compare_image_structure_bin",
     srcs = ["compare_image_structure.py"],
@@ -120,6 +170,17 @@ py_test(
     name = "accounts_test",
     srcs = ["accounts_test.py"],
     data = [":test_accounts_image_base_layer"],
+)
+
+py_test(
+    name = "oci_metadata_test",
+    srcs = ["oci_metadata_test.py"],
+    data = [
+        ":test_oci_child_paths_image_paths_layer",
+        ":test_oci_metadata_image",
+        ":test_oci_metadata_image_base_layer",
+        ":test_oci_metadata_image_files_layer",
+    ],
 )
 
 bzl_library(

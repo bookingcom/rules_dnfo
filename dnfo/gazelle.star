@@ -38,6 +38,12 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "flatten_all_layers",
         "flatten_dnfo_layers",
         "crypto_policy",
+        "ports",
+        "exposed_ports",
+        "volumes",
+        "paths",
+        "env_file",
+        "config_fragment",
     ],
 })
 
@@ -524,6 +530,41 @@ def _declare(ctx):
             crypto_pol = contents.get("crypto_policy", contents.get("crypto-policy"))
         if crypto_pol != None and type(crypto_pol) == "string":
             attrs["crypto_policy"] = crypto_pol
+
+        # Ports
+        ports = data.get("ports", data.get("exposed_ports", data.get("exposed-ports")))
+        if ports == None and contents and type(contents) == "dict":
+            ports = contents.get("ports", contents.get("exposed_ports", contents.get("exposed-ports")))
+        if ports != None:
+            attrs["ports"] = ports if type(ports) == "list" else [ports]
+
+        # Volumes
+        vols = data.get("volumes")
+        if vols == None and contents and type(contents) == "dict":
+            vols = contents.get("volumes")
+        if vols != None:
+            attrs["volumes"] = vols if type(vols) == "list" else [vols]
+
+        # Paths
+        paths = data.get("paths")
+        if paths == None and contents and type(contents) == "dict":
+            paths = contents.get("paths")
+        if paths != None and type(paths) == "list":
+            attrs["paths"] = paths
+
+        # Environment file
+        env_f = data.get("env_file", data.get("env-file"))
+        if not env_f and contents and type(contents) == "dict":
+            env_f = contents.get("env_file", contents.get("env-file"))
+        if env_f:
+            attrs["env_file"] = _resolve_file_label(ctx.rel, str(env_f))
+
+        # Config fragment
+        cfg_frag = data.get("config_fragment", data.get("config-fragment"))
+        if not cfg_frag and contents and type(contents) == "dict":
+            cfg_frag = contents.get("config_fragment", contents.get("config-fragment"))
+        if cfg_frag:
+            attrs["config_fragment"] = _resolve_file_label(ctx.rel, str(cfg_frag))
 
         # Lockfile check
         has_lock = False
