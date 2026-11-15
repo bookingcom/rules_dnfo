@@ -2,6 +2,7 @@
 
 load("@bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@bazel_lib//lib:write_source_files.bzl", "write_source_file")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@dnf5-prebuilt//dnf5-prebuilt:defs.bzl", "dnf_config", "rpm_extract", "rpm_layer", "rpm_lock", "rpm_mark")
 load("@rules_containers_util//containers:defs.bzl", "image_extract")
 load(
@@ -23,6 +24,22 @@ load("@supply_chain_tools//sbom:cyclonedx.bzl", "cyclonedx")
 load("@supply_chain_tools//sbom:sbom.bzl", "sbom")
 load("@supply_chain_tools//sbom:spdx.bzl", "spdx")
 load("//dnfo/private:p11_kit_extract.bzl", "p11_kit_extract")
+
+_CRYPTO_BACKENDS = [
+    "bind",
+    "gnutls",
+    "java",
+    "krb5",
+    "libreswan",
+    "libssh",
+    "nss",
+    "openssh",
+    "opensshserver",
+    "openssl_fips",
+    "opensslcnf",
+    "rpm-sequoia",
+    "sequoia",
+]
 
 def _dnfo_image_to_layer_impl(ctx):
     manifest_info = ctx.attr.image[ImageManifestInfo]
@@ -491,6 +508,7 @@ def dnfo_image(
         install_langs = None,
         locale = None,
         certificates = None,
+        crypto_policy = None,
         extra_layers = None,
         flatten_all_layers = False,
         flatten_dnfo_layers = False,
@@ -999,6 +1017,40 @@ def dnfo_image(
             files_metadata[p_dest] = json.encode({"mode": p_val["mode"]})
         for s_dest, s_target in parsed_certs["anchor_symlinks"].items():
             files_symlinks[s_dest] = s_target
+
+    # Crypto policies synthesis
+    effective_crypto_policy = None
+    if crypto_policy != None:
+        if crypto_policy and type(crypto_policy) == "string":
+            effective_crypto_policy = crypto_policy.upper()
+    elif packages and "crypto-policies" in packages:
+        effective_crypto_policy = "DEFAULT"
+
+    if effective_crypto_policy:
+        config_target = name + "_crypto_policies_config"
+        current_target = name + "_crypto_policies_current"
+        write_file(
+            name = config_target,
+            out = config_target + ".txt",
+            content = [effective_crypto_policy, ""],
+            visibility = ["//visibility:private"],
+        )
+        write_file(
+            name = current_target,
+            out = current_target + ".txt",
+            content = [effective_crypto_policy, ""],
+            visibility = ["//visibility:private"],
+        )
+        if "/etc/crypto-policies/config" not in user_file_paths:
+            files_srcs["/etc/crypto-policies/config"] = ":" + config_target
+            files_metadata["/etc/crypto-policies/config"] = json.encode({"mode": "0644"})
+        if "/etc/crypto-policies/state/current" not in user_file_paths:
+            files_srcs["/etc/crypto-policies/state/current"] = ":" + current_target
+            files_metadata["/etc/crypto-policies/state/current"] = json.encode({"mode": "0644"})
+        for b in _CRYPTO_BACKENDS:
+            link_dest = "/etc/crypto-policies/back-ends/" + b + ".config"
+            if link_dest not in user_file_paths:
+                files_symlinks[link_dest] = "/usr/share/crypto-policies/" + effective_crypto_policy + "/" + b + ".txt"
 
     files_layer_label = None
     if files_srcs or files_symlinks:
