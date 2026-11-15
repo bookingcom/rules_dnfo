@@ -1,0 +1,7 @@
+archs:
+  - x86_64
+base: :test_oci_metadata_dnfo
+paths:
+  - path: /opt/custom
+    type: directory
+    mode: "0700"
