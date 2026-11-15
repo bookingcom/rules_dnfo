@@ -37,6 +37,7 @@ aspect.gazelle_rule_kind("dnfo_image", {
         "extra_layers",
         "flatten_all_layers",
         "flatten_dnfo_layers",
+        "crypto_policy",
     ],
 })
 
@@ -516,6 +517,13 @@ def _declare(ctx):
             flatten_dnfo = contents.get("flatten_dnfo_layers", contents.get("flatten-dnfo-layers"))
         if flatten_dnfo != None and type(flatten_dnfo) == "bool":
             attrs["flatten_dnfo_layers"] = flatten_dnfo
+
+        # Crypto policy configuration
+        crypto_pol = data.get("crypto_policy", data.get("crypto-policy"))
+        if crypto_pol == None and contents and type(contents) == "dict":
+            crypto_pol = contents.get("crypto_policy", contents.get("crypto-policy"))
+        if crypto_pol != None and type(crypto_pol) == "string":
+            attrs["crypto_policy"] = crypto_pol
 
         # Lockfile check
         has_lock = False

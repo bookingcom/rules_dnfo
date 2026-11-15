@@ -34,6 +34,20 @@ dnfo_image(
     lock_only = False,
 )
 
+dnfo_image(
+    name = "test_crypto_policy_image",
+    archs = ["x86_64"],
+    crypto_policy = "DEFAULT",
+    lock_only = False,
+)
+
+dnfo_image(
+    name = "test_crypto_policy_fips_image",
+    archs = ["x86_64"],
+    crypto_policy = "FIPS",
+    lock_only = False,
+)
+
 py_binary(
     name = "compare_image_structure_bin",
     srcs = ["compare_image_structure.py"],
@@ -64,6 +78,15 @@ py_test(
     data = [
         ":test_defaults_image",
         ":test_inherit_custom",
+    ],
+)
+
+py_test(
+    name = "crypto_policy_test",
+    srcs = ["crypto_policy_test.py"],
+    data = [
+        ":test_crypto_policy_fips_image_files_layer",
+        ":test_crypto_policy_image_files_layer",
     ],
 )
 
