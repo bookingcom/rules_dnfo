@@ -463,6 +463,8 @@ def _declare(ctx):
 
         # Certificates support
         certs_data = data.get("certificates")
+        if certs_data == None and contents and type(contents) == "dict":
+            certs_data = contents.get("certificates")
         if certs_data != None:
             if type(certs_data) == "dict":
                 certs_dict = dict(certs_data)
@@ -482,6 +484,8 @@ def _declare(ctx):
                     certs_dict["additional"] = new_additional
                 attrs["certificates"] = certs_dict
             elif type(certs_data) == "list":
+                attrs["certificates"] = certs_data
+            elif type(certs_data) == "bool":
                 attrs["certificates"] = certs_data
 
         # Extra layers support (list of dicts with 'layer' and optional 'arch')
