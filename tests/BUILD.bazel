@@ -48,6 +48,32 @@ dnfo_image(
     lock_only = False,
 )
 
+dnfo_image(
+    name = "test_accounts_image",
+    accounts = {
+        "groups": [
+            {
+                "gid": 10,
+                "groupname": "wheel",
+                "members": ["customuser"],
+            },
+            {
+                "gid": 2000,
+                "groupname": "customgroup",
+            },
+        ],
+        "users": [
+            {
+                "gid": 2000,
+                "uid": 2000,
+                "username": "customuser",
+            },
+        ],
+    },
+    archs = ["x86_64"],
+    lock_only = False,
+)
+
 py_binary(
     name = "compare_image_structure_bin",
     srcs = ["compare_image_structure.py"],
@@ -88,6 +114,12 @@ py_test(
         ":test_crypto_policy_fips_image_files_layer",
         ":test_crypto_policy_image_files_layer",
     ],
+)
+
+py_test(
+    name = "accounts_test",
+    srcs = ["accounts_test.py"],
+    data = [":test_accounts_image_base_layer"],
 )
 
 bzl_library(
