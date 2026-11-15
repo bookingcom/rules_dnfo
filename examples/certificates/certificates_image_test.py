@@ -74,6 +74,13 @@ class TestCertificatesImage(unittest.TestCase):
             self.assertEqual(stat.S_IMODE(corp_anchor.mode), 0o644)
             self.assertEqual(stat.S_IMODE(inline_anchor.mode), 0o644)
 
+    def test_openssl_bundle_symlink(self):
+        with tarfile.open(self.files_layer_path, "r:gz") as tar:
+            openssl_member = tar.getmember("etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt")
+            self.assertIsNotNone(openssl_member)
+            self.assertTrue(openssl_member.issym())
+            self.assertEqual(openssl_member.linkname, "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem")
+
 
 if __name__ == "__main__":
     unittest.main()

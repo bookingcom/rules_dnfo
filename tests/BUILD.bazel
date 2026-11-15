@@ -49,6 +49,45 @@ dnfo_image(
 )
 
 dnfo_image(
+    name = "test_auto_certificates_image",
+    archs = ["x86_64"],
+    contents = {
+        "x86_64": "@certificates_x86_64_packages//:rpms",
+    },
+    lock_only = False,
+    packages = [
+        "bash",
+        "ca-certificates",
+    ],
+)
+
+dnfo_image(
+    name = "test_disabled_certificates_image",
+    archs = ["x86_64"],
+    certificates = False,
+    contents = {
+        "x86_64": "@certificates_x86_64_packages//:rpms",
+    },
+    lock_only = False,
+    packages = [
+        "bash",
+        "ca-certificates",
+    ],
+)
+
+dnfo_image(
+    name = "test_auto_p11_kit_trust_image",
+    archs = ["x86_64"],
+    contents = {
+        "x86_64": "@certificates_x86_64_packages//:rpms",
+    },
+    lock_only = False,
+    packages = [
+        "p11-kit-trust",
+    ],
+)
+
+dnfo_image(
     name = "test_accounts_image",
     accounts = {
         "groups": [
@@ -113,6 +152,18 @@ py_test(
     data = [
         ":test_crypto_policy_fips_image_files_layer",
         ":test_crypto_policy_image_files_layer",
+    ],
+)
+
+py_test(
+    name = "ca_certificates_synthesis_test",
+    srcs = ["ca_certificates_synthesis_test.py"],
+    data = [
+        ":test_auto_certificates_image_base_layer",
+        ":test_auto_certificates_image_files_layer",
+        ":test_auto_p11_kit_trust_image_base_layer",
+        ":test_auto_p11_kit_trust_image_files_layer",
+        ":test_disabled_certificates_image_base_layer",
     ],
 )
 
