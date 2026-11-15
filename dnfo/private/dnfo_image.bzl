@@ -41,6 +41,27 @@ _CRYPTO_BACKENDS = [
     "sequoia",
 ]
 
+_DEFAULT_SYSTEM_USERS = [
+    {"username": "root", "uid": 0, "gid": 0, "home": "/root", "shell": "/bin/bash"},
+    {"username": "bin", "uid": 1, "gid": 1, "home": "/", "shell": "/sbin/nologin"},
+    {"username": "daemon", "uid": 2, "gid": 2, "home": "/", "shell": "/sbin/nologin"},
+    {"username": "adm", "uid": 3, "gid": 4, "home": "/", "shell": "/sbin/nologin"},
+    {"username": "nobody", "uid": 65534, "gid": 65534, "home": "/", "shell": "/sbin/nologin"},
+]
+
+_DEFAULT_SYSTEM_GROUPS = [
+    {"name": "root", "gid": 0},
+    {"name": "bin", "gid": 1},
+    {"name": "daemon", "gid": 2},
+    {"name": "sys", "gid": 3},
+    {"name": "adm", "gid": 4},
+    {"name": "tty", "gid": 5},
+    {"name": "disk", "gid": 6},
+    {"name": "wheel", "gid": 10},
+    {"name": "users", "gid": 100},
+    {"name": "nobody", "gid": 65534},
+]
+
 def _dnfo_image_to_layer_impl(ctx):
     manifest_info = ctx.attr.image[ImageManifestInfo]
     return [
@@ -883,29 +904,97 @@ def dnfo_image(
         base_layer_srcs.append(":" + name + "_skeleton")
 
     if need_accounts:
-        user_entries = [
-            passwd_entry(username = "root", uid = 0, gid = 0, home = "/root", shell = "/bin/bash"),
-        ]
-        group_entries = [
-            group_entry(name = "root", gid = 0),
-        ]
-
+        user_entries = []
+        declared_usernames = {}
+        declared_uids = {}
         users_list = accounts.get("users", []) if accounts else []
         for u in users_list:
             uname = u.get("username", "")
-            if uname and uname != "root":
+            if uname:
+                uid = u.get("uid", 1000)
+                gid = u.get("gid", 1000)
+                home = u.get("home", "/home/" + uname if uname != "root" else "/root")
+                shell = u.get("shell", "/bin/bash")
+                declared_usernames[uname] = {
+                    "uid": uid,
+                    "gid": gid,
+                    "home": home,
+                    "shell": shell,
+                }
+                declared_uids[uid] = uname
+
+        for su in _DEFAULT_SYSTEM_USERS:
+            uname = su["username"]
+            su_uid = su["uid"]
+            if uname in declared_usernames:
+                entry = declared_usernames[uname]
+                user_entries.append(passwd_entry(
+                    username = uname,
+                    uid = entry["uid"],
+                    gid = entry["gid"],
+                    home = entry["home"],
+                    shell = entry["shell"],
+                ))
+            elif su_uid not in declared_uids:
+                user_entries.append(passwd_entry(
+                    username = uname,
+                    uid = su_uid,
+                    gid = su["gid"],
+                    home = su["home"],
+                    shell = su["shell"],
+                ))
+
+        for u in users_list:
+            uname = u.get("username", "")
+            if uname and uname not in [su["username"] for su in _DEFAULT_SYSTEM_USERS]:
                 uid = u.get("uid", 1000)
                 gid = u.get("gid", 1000)
                 home = u.get("home", "/home/" + uname)
                 shell = u.get("shell", "/bin/bash")
-                user_entries.append(passwd_entry(username = uname, uid = uid, gid = gid, home = home, shell = shell))
+                user_entries.append(passwd_entry(
+                    username = uname,
+                    uid = uid,
+                    gid = gid,
+                    home = home,
+                    shell = shell,
+                ))
 
+        group_entries = []
+        declared_groupnames = {}
+        declared_gids = {}
         groups_list = accounts.get("groups", []) if accounts else []
         for g in groups_list:
             gname = g.get("groupname", g.get("name", ""))
-            if gname and gname != "root":
+            if gname:
                 gid = g.get("gid", 1000)
-                group_entries.append(group_entry(name = gname, gid = gid))
+                members = g.get("members", g.get("users"))
+                declared_groupnames[gname] = {
+                    "gid": gid,
+                    "members": members,
+                }
+                declared_gids[gid] = gname
+
+        for sg in _DEFAULT_SYSTEM_GROUPS:
+            gname = sg["name"]
+            sg_gid = sg["gid"]
+            if gname in declared_groupnames:
+                entry = declared_groupnames[gname]
+                group_kwargs = {}
+                if entry["members"]:
+                    group_kwargs["users"] = entry["members"] if type(entry["members"]) == "list" else [entry["members"]]
+                group_entries.append(group_entry(name = gname, gid = entry["gid"], **group_kwargs))
+            elif sg_gid not in declared_gids:
+                group_entries.append(group_entry(name = gname, gid = sg_gid))
+
+        for g in groups_list:
+            gname = g.get("groupname", g.get("name", ""))
+            if gname and gname not in [sg["name"] for sg in _DEFAULT_SYSTEM_GROUPS]:
+                gid = g.get("gid", 1000)
+                members = g.get("members", g.get("users"))
+                group_kwargs = {}
+                if members:
+                    group_kwargs["users"] = members if type(members) == "list" else [members]
+                group_entries.append(group_entry(name = gname, gid = gid, **group_kwargs))
 
         etc_passwd(
             name = name + "_passwd",
