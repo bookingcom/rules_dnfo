@@ -14,7 +14,7 @@ load(
     "trust_store",
 )
 load("@rules_img//img:convert.bzl", "image_flatten")
-load("@rules_img//img:image.bzl", "image_index", "image_manifest")
+load("@rules_img//img:image.bzl", "INHERIT_FROM_BASE", "image_index", "image_manifest")
 load("@rules_img//img:layer.bzl", "image_layer", "layer_from_tar")
 load("@rules_img//img:load.bzl", "image_load")
 load("@rules_img//img:providers.bzl", "ImageManifestInfo", "LayersInfo")
@@ -668,7 +668,7 @@ def dnfo_image(
         for a in resolved_archs:
             arch_target_platform, arch_extract_platform = _platform_for_arch(a)
             arch_base_rpmdb = base_rpmdb
-            if base and not base_rpmdb:
+            if (packages or contents) and base and not base_rpmdb:
                 extract_rpmdb_name = name + "_" + a + "_base_rpmdb"
                 image_extract(
                     name = extract_rpmdb_name,
@@ -747,7 +747,7 @@ def dnfo_image(
         target_platform, extract_platform = _platform_for_arch(arch)
 
         extracted_repos = None
-        if base and not base_rpmdb:
+        if (packages or contents) and base and not base_rpmdb:
             extract_rpmdb_name = name + "_base_rpmdb"
             image_extract(
                 name = extract_rpmdb_name,
@@ -809,9 +809,28 @@ def dnfo_image(
             return
 
     # --- Phase 3: Image Assembly ---
-    ep = entrypoint if entrypoint != None else ["/bin/bash"]
-    c = cmd if cmd != None else ["-l"]
-    wd = workdir if workdir != None else "/home"
+    if type(entrypoint) == "string":
+        entrypoint = [entrypoint]
+    if type(cmd) == "string":
+        cmd = [cmd]
+
+    if base != None:
+        ep = entrypoint if entrypoint != None else [INHERIT_FROM_BASE]
+        c = cmd if cmd != None else [INHERIT_FROM_BASE]
+        wd = workdir if workdir != None else INHERIT_FROM_BASE
+        u = str(user) if user != None else INHERIT_FROM_BASE
+    else:
+        if entrypoint != None:
+            ep = entrypoint
+            c = cmd if cmd != None else []
+        elif cmd != None:
+            ep = []
+            c = cmd
+        else:
+            ep = []
+            c = ["/bin/bash"]
+        wd = workdir if workdir != None else "/home"
+        u = str(user) if user != None else None
 
     merged_env = dict(env) if env else {}
     if primary_locale and "LANG" not in merged_env:
@@ -1000,7 +1019,7 @@ def dnfo_image(
         for a in resolved_archs:
             arch_target_platform, _ = _platform_for_arch(a)
             arch_base_rpmdb = base_rpmdb
-            if base and not base_rpmdb:
+            if (packages or contents) and base and not base_rpmdb:
                 arch_base_rpmdb = ":" + name + "_" + a + "_base_rpmdb"
 
             arch_layers = []
@@ -1059,7 +1078,7 @@ def dnfo_image(
                 working_dir = wd,
                 env = merged_env,
                 platform = arch_target_platform,
-                user = user,
+                user = u,
                 stop_signal = stop_signal,
                 labels = labels,
                 annotations = annotations,
@@ -1188,7 +1207,7 @@ def dnfo_image(
         working_dir = wd,
         env = merged_env,
         platform = target_platform,
-        user = user,
+        user = u,
         stop_signal = stop_signal,
         labels = labels,
         annotations = annotations,
