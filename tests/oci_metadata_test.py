@@ -30,7 +30,7 @@ class TestOciMetadata(unittest.TestCase):
         raise FileNotFoundError(f"Could not find runfile: {relpath}")
 
     def test_image_config_metadata(self):
-        config_path = self._resolve_path("tests/test_oci_metadata_image_config.json")
+        config_path = self._resolve_path("tests/test_oci_metadata_dnfo_config.json")
         with open(config_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         cfg = data.get("config", {})
@@ -52,7 +52,7 @@ class TestOciMetadata(unittest.TestCase):
 
     def test_paths_in_base_and_files_layers(self):
         # 1. Base layer contains extra directory /var/log/app
-        base_layer_path = self._resolve_path("tests/test_oci_metadata_image_base_layer.tgz")
+        base_layer_path = self._resolve_path("tests/test_oci_metadata_dnfo_base_layer.tgz")
         with tarfile.open(base_layer_path, "r:gz") as tar:
             dir_member = tar.getmember("var/log/app")
             self.assertIsNotNone(dir_member)
@@ -62,7 +62,7 @@ class TestOciMetadata(unittest.TestCase):
             self.assertEqual(dir_member.gid, 1000)
 
         # 2. Files layer contains empty file /var/run/app.pid and symlink /etc/ssl/cert.pem
-        files_layer_path = self._resolve_path("tests/test_oci_metadata_image_files_layer.tgz")
+        files_layer_path = self._resolve_path("tests/test_oci_metadata_dnfo_files_layer.tgz")
         with tarfile.open(files_layer_path, "r:gz") as tar:
             file_member = tar.getmember("var/run/app.pid")
             self.assertIsNotNone(file_member)
@@ -79,7 +79,7 @@ class TestOciMetadata(unittest.TestCase):
 
     def test_child_paths_layer(self):
         # Child image with base inherits base and generates dedicated paths layer
-        paths_layer_path = self._resolve_path("tests/test_oci_child_paths_image_paths_layer.tgz")
+        paths_layer_path = self._resolve_path("tests/test_oci_child_paths_dnfo_paths_layer.tgz")
         with tarfile.open(paths_layer_path, "r:gz") as tar:
             dir_member = tar.getmember("opt/custom")
             self.assertIsNotNone(dir_member)
