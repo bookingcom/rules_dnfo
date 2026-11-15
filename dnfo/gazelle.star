@@ -231,7 +231,7 @@ def _declare(ctx):
 
         # Entrypoint
         ep = data.get("entrypoint")
-        if ep:
+        if ep != None:
             if type(ep) == "dict" and "command" in ep:
                 ep_list = [ep["command"]]
                 if "args" in ep and type(ep["args"]) == "list":
@@ -244,7 +244,7 @@ def _declare(ctx):
 
         # Cmd
         cmd = data.get("cmd")
-        if cmd:
+        if cmd != None:
             if type(cmd) == "list":
                 attrs["cmd"] = cmd
             elif type(cmd) == "string":

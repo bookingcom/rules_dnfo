@@ -1,7 +1,38 @@
 load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_test")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("//dnfo:defs.bzl", "dnfo_image")
 
 package(default_visibility = ["//visibility:public"])
+
+dnfo_image(
+    name = "test_defaults_image",
+    archs = ["x86_64"],
+    lock_only = False,
+)
+
+dnfo_image(
+    name = "test_child_image",
+    archs = ["x86_64"],
+    base = ":test_defaults_image",
+    lock_only = False,
+)
+
+dnfo_image(
+    name = "test_custom_base",
+    archs = ["x86_64"],
+    cmd = ["--flag"],
+    entrypoint = ["/usr/bin/my-app"],
+    lock_only = False,
+    user = "1001",
+    workdir = "/app",
+)
+
+dnfo_image(
+    name = "test_inherit_custom",
+    archs = ["x86_64"],
+    base = ":test_custom_base",
+    lock_only = False,
+)
 
 py_binary(
     name = "compare_image_structure_bin",
@@ -24,6 +55,15 @@ py_test(
         "//examples/minimal:minimal_cyclonedx",
         "//examples/minimal:minimal_spdx",
         "//examples/minimal:minimal_x86_64_spdx",
+    ],
+)
+
+py_test(
+    name = "image_config_test",
+    srcs = ["image_config_test.py"],
+    data = [
+        ":test_defaults_image",
+        ":test_inherit_custom",
     ],
 )
 
