@@ -96,6 +96,8 @@ def _create_image_manifest(
         stop_signal = None,
         labels = None,
         annotations = None,
+        config_fragment = None,
+        env_file = None,
         visibility = ["//visibility:public"]):
     """Helper to assemble an image manifest with optional layer flattening.
 
@@ -113,6 +115,10 @@ def _create_image_manifest(
         manifest_kwargs["labels"] = labels
     if annotations:
         manifest_kwargs["annotations"] = annotations
+    if config_fragment:
+        manifest_kwargs["config_fragment"] = config_fragment
+    if env_file:
+        manifest_kwargs["env_file"] = env_file
 
     if flatten_all_layers or (flatten_dnfo_layers and not base):
         if base:
@@ -533,6 +539,12 @@ def dnfo_image(
         extra_layers = None,
         flatten_all_layers = False,
         flatten_dnfo_layers = False,
+        ports = [],
+        exposed_ports = [],
+        volumes = [],
+        paths = [],
+        env_file = None,
+        config_fragment = None,
         **kwargs):
     """Builds an OCI container image or multi-arch image index from RPM packages declared in dnfo YAML.
 
@@ -890,18 +902,135 @@ def dnfo_image(
 
     parsed_certs = _process_certificates(name, certificates, packages, user_file_paths)
 
+    # Process ports and volumes -> config_fragment
+    all_ports = []
+    if ports:
+        all_ports.extend(ports if type(ports) == "list" else [ports])
+    if exposed_ports:
+        all_ports.extend(exposed_ports if type(exposed_ports) == "list" else [exposed_ports])
+
+    all_volumes = []
+    if volumes:
+        all_volumes.extend(volumes if type(volumes) == "list" else [volumes])
+
+    effective_config_fragment = config_fragment
+    if all_ports or all_volumes:
+        frag_dict = {}
+        config_obj = {}
+        if all_ports:
+            exposed_ports_dict = {}
+            for p in all_ports:
+                sp = str(p)
+                port_key = sp if "/" in sp else (sp + "/tcp")
+                exposed_ports_dict[port_key] = {}
+            config_obj["ExposedPorts"] = exposed_ports_dict
+
+        if all_volumes:
+            volumes_dict = {}
+            for v in all_volumes:
+                volumes_dict[str(v)] = {}
+            config_obj["Volumes"] = volumes_dict
+
+        frag_dict["config"] = config_obj
+        frag_target = name + "_config_fragment"
+        write_file(
+            name = frag_target,
+            out = frag_target + ".json",
+            content = [json.encode_indent(frag_dict, indent = "  "), ""],
+            visibility = ["//visibility:private"],
+        )
+        effective_config_fragment = ":" + frag_target
+
+    # Process paths attribute: directory creation, empty files, symlinks
+    extra_directories = {}
+    paths_empty_files = {}
+    paths_symlinks = {}
+    paths_metadata = {}
+    paths_list = paths if type(paths) == "list" else []
+    for idx, p_item in enumerate(paths_list):
+        if type(p_item) != "dict":
+            continue
+        p_path = p_item.get("path", "")
+        if not p_path:
+            continue
+        p_path = p_path if p_path.startswith("/") else ("/" + p_path)
+        p_type = p_item.get("type", "")
+        if not p_type:
+            if "source" in p_item or "target" in p_item or "linkname" in p_item:
+                p_type = "symlink"
+            elif p_path.endswith("/"):
+                p_type = "directory"
+            else:
+                p_type = "empty-file"
+
+        meta = {}
+        p_mode = p_item.get("permissions", p_item.get("mode"))
+        if p_mode != None:
+            meta["mode"] = str(p_mode)
+        p_uid = p_item.get("uid")
+        if p_uid != None:
+            meta["uid"] = p_uid
+        p_gid = p_item.get("gid")
+        if p_gid != None:
+            meta["gid"] = p_gid
+
+        if p_type == "symlink":
+            p_target = p_item.get("source", p_item.get("target", p_item.get("linkname", "")))
+            if p_target:
+                paths_symlinks[p_path] = p_target
+        elif p_type in ("empty-file", "file"):
+            empty_file_target = name + "_empty_file_" + str(idx)
+            write_file(
+                name = empty_file_target,
+                out = empty_file_target + ".empty",
+                content = [],
+                visibility = ["//visibility:private"],
+            )
+            paths_empty_files[p_path] = ":" + empty_file_target
+            if meta:
+                paths_metadata[p_path] = json.encode(meta)
+        elif p_type in ("directory", "dir"):
+            dir_path = p_path.rstrip("/")
+            extra_directories[dir_path] = json.encode(meta) if meta else "{}"
+
     # Base skeleton and account entries
     has_filesystem = ("filesystem" in packages) if packages else False
     need_skeleton = include_skeleton if include_skeleton != None else (not bool(base) and not has_filesystem)
     need_accounts = bool(accounts) or (need_skeleton and not bool(base))
 
     base_layer_srcs = []
+    paths_layer_label = None
     if need_skeleton:
+        linux_skeleton_kwargs = {}
+        if extra_directories:
+            linux_skeleton_kwargs["extra_directories"] = extra_directories
         linux_skeleton(
             name = name + "_skeleton",
             visibility = ["//visibility:private"],
+            **linux_skeleton_kwargs
         )
         base_layer_srcs.append(":" + name + "_skeleton")
+    elif extra_directories:
+        linux_skeleton(
+            name = name + "_paths_skeleton",
+            bin_and_lib = "disabled",
+            etc = "disabled",
+            extra_directories = extra_directories,
+            home = "disabled",
+            mount_points = "disabled",
+            opt_srv = "disabled",
+            root = "disabled",
+            run = "disabled",
+            tmp = "disabled",
+            var = "disabled",
+            visibility = ["//visibility:private"],
+        )
+        base_image_layer(
+            name = name + "_paths_layer",
+            srcs = [":" + name + "_paths_skeleton"],
+            visibility = ["//visibility:private"],
+        )
+        paths_layer_label = ":" + name + "_paths_layer"
 
     if need_accounts:
         user_entries = []
@@ -1052,10 +1181,10 @@ def dnfo_image(
         )
         base_layer_label = ":" + name + "_base_layer"
 
-    # Files layer: combine user-defined files and certificate anchors/symlinks
-    files_srcs = {}
-    files_metadata = {}
-    files_symlinks = {}
+    # Files layer: combine user-defined files, paths, and certificate anchors/symlinks
+    files_srcs = dict(paths_empty_files)
+    files_metadata = dict(paths_metadata)
+    files_symlinks = dict(paths_symlinks)
 
     if files:
         if type(files) == "dict":
@@ -1202,6 +1331,8 @@ def dnfo_image(
                 arch_layers.append(base_layer_label)
             if files_layer_label:
                 arch_layers.append(files_layer_label)
+            if paths_layer_label:
+                arch_layers.append(paths_layer_label)
 
             arch_extra = _layers_for_arch(extra_layers, a)
             if arch_extra:
@@ -1223,6 +1354,8 @@ def dnfo_image(
                 stop_signal = stop_signal,
                 labels = labels,
                 annotations = annotations,
+                config_fragment = effective_config_fragment,
+                env_file = env_file,
                 visibility = visibility,
             )
             manifest_labels.append(":" + target_name)
@@ -1332,6 +1465,8 @@ def dnfo_image(
         layers.append(base_layer_label)
     if files_layer_label:
         layers.append(files_layer_label)
+    if paths_layer_label:
+        layers.append(paths_layer_label)
 
     single_extra = _layers_for_arch(extra_layers, arch)
     if single_extra:
@@ -1352,6 +1487,8 @@ def dnfo_image(
         stop_signal = stop_signal,
         labels = labels,
         annotations = annotations,
+        config_fragment = effective_config_fragment,
+        env_file = env_file,
         visibility = visibility,
     )
 
